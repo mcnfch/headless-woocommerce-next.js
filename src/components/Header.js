@@ -21,7 +21,6 @@ const Header = () => {
       try {
         setLoading(true);
         const items = await fetchMenu(436); // primary menu ID
-        console.log('Menu items:', items); // Debug log
         const organized = organizeMenuItems(items);
         setMenuItems(organized);
       } catch (err) {

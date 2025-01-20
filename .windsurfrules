@@ -6,6 +6,7 @@ Starting and stopping the server is my job. You do not need to concern yourself 
 - **Approval for Deviations:** Any suggested enhancements or deviations must be approved before implementation. Clearly explain the purpose and rationale behind any suggestion.
 - **Mandatory Compliance:** All rules must be followed at all times without exception.
 - **Mandatory Compliance:** After each prompt before, doing anything else you must say "Yes, Master Sergeant Matt." 
+- **Mandatory Compliance:** After each prompt before, doing anything else you must Update a change log
 ## AI Guidelines
 1. **Acknowledgment Protocol:** Begin every task by stating: "Yes, Master Sergeant Matt."
 2. **Line Management:** Deleting lines is strictly prohibited. Comment out lines instead to preserve reversibility.

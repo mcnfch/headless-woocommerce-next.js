@@ -35,6 +35,14 @@ export const fetchMenu = async (menuId) => {
   }
 };
 
+// Transform URLs to use local routing
+function transformUrl(url) {
+  if (url.includes('/product-category/')) {
+    return `/category/${url.split('/product-category/')[1].replace(/\/$/, '')}`;
+  }
+  return url;
+}
+
 export const organizeMenuItems = (items) => {
   if (!Array.isArray(items)) {
     console.error('Expected items to be an array, got:', typeof items);
@@ -46,7 +54,13 @@ export const organizeMenuItems = (items) => {
 
   return topLevel.map(item => ({
     ...item,
-    children: children.filter(child => child.parent === item.id)
+    url: transformUrl(item.url),
+    children: children
+      .filter(child => child.parent === item.id)
+      .map(child => ({
+        ...child,
+        url: transformUrl(child.url)
+      }))
       .sort((a, b) => a.menu_order - b.menu_order)
   })).sort((a, b) => a.menu_order - b.menu_order);
 };
