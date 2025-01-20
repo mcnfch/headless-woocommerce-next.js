@@ -10,15 +10,20 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.0",
+    "@heroicons/react": "^2.2.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@woocommerce/woocommerce-rest-api": "^1.0.1",
     "ioredis": "^5.4.2",
     "next": "15.1.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "supports-color": "^10.0.0"
+    "stripe": "^17.5.0",
+    "supports-color": "^10.0.0",
+    "use-shopping-cart": "^3.2.0"
   },
   "devDependencies": {
+    "@types/node": "22.10.7",
     "autoprefixer": "^10.4.20",
     "postcss": "^8",
     "stylelint": "^16.13.2",

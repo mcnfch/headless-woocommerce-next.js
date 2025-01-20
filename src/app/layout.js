@@ -3,6 +3,9 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { initializeServer } from './init';
 import "./globals.css";
+import CartProvider from "@/components/provider";
+import Cart from "@/components/cart";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,13 +28,19 @@ export default async function RootLayout({ children }) {
   console.log('Initialization result:', initResult);
 
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
-      >
-        <Header />
-        <main className="flex-grow glass-background">{children}</main>
-        <Footer />
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body>
+        <CartProvider>
+          <Header>
+            <Suspense fallback={<div>Loading cart...</div>}>
+              <Cart />
+            </Suspense>
+          </Header>
+          <Suspense>
+            <main className="flex-grow glass-background">{children}</main>
+          </Suspense>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );
