@@ -33,10 +33,13 @@ export default function ProductCard({ product }) {
   // Calculate optimal image dimensions
   const imageWidth = 800;
   const imageHeight = 800;
+
+  // Transform product URL to use dev domain
+  const devPermalink = permalink.replace('woo.groovygallerydesigns.com', 'dev.groovygallerydesigns.com');
   
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <Link href={permalink} className="block relative aspect-square">
+      <Link href={devPermalink} className="block relative aspect-square">
         <Image
           src={mainImage.src}
           alt={mainImage.alt || name}
@@ -54,7 +57,7 @@ export default function ProductCard({ product }) {
       
       <div className="p-4">
         <h2 className="text-lg font-semibold mb-2 line-clamp-2">
-          <Link href={permalink} className="hover:text-blue-600">
+          <Link href={devPermalink} className="hover:text-blue-600">
             {name}
           </Link>
         </h2>
