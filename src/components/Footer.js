@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { fetchMenu, organizeMenuItems } from '../utils/api';
 
 const Footer = () => {
@@ -34,7 +35,15 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-bold mb-4">Groovy Gallery Designs</h3>
+            <div className="mb-4 w-48">
+              <Image
+                src="/images/GGLogo2.0.png"
+                alt="Groovy Gallery Designs"
+                width={192}
+                height={48}
+                className="w-full h-auto"
+              />
+            </div>
             <p className="text-gray-300">
               Your one-stop shop for festival fashion, accessories, and groovy gear.
             </p>

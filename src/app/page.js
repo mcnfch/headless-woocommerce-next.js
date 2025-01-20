@@ -1,6 +1,11 @@
 import Image from "next/image";
+import { getTopLevelCategories } from "@/lib/woocommerce";
 
-export default function Home() {
+export const revalidate = 3600; // Revalidate every hour
+
+export default async function Home() {
+  const categories = await getTopLevelCategories();
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -32,60 +37,32 @@ export default function Home() {
       </section>
 
       {/* Featured Categories */}
-      <section className="py-16">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12 text-black">Shop by Category</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Women's Category */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="aspect-w-16 aspect-h-9 bg-purple-100"></div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Women's Collection</h3>
-                <p className="text-gray-600 mb-4">
-                  Discover stunning rave wear and festival fashion for women
-                </p>
-                <a
-                  href="/product-category/women"
-                  className="text-purple-600 font-semibold hover:text-purple-700"
-                >
-                  Shop Women's →
-                </a>
+            {categories.map((category) => (
+              <div key={category.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="aspect-w-16 aspect-h-9 relative">
+                  {category.image && (
+                    <Image
+                      src={category.image.src}
+                      alt={category.name}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                  )}
+                </div>
+                <div className="p-6">
+                  <h3 className="text-xl font-semibold mb-2 text-black">{category.name}</h3>
+                  <p className="text-black mb-4">{category.description || `Explore our ${category.name} collection`}</p>
+                  <a href={`/category/${category.slug}`} className="text-black font-semibold hover:text-purple-700">
+                    Shop {category.name} →
+                  </a>
+                </div>
               </div>
-            </div>
-
-            {/* Men's Category */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="aspect-w-16 aspect-h-9 bg-blue-100"></div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Men's Collection</h3>
-                <p className="text-gray-600 mb-4">
-                  Find comfortable and stylish festival wear for men
-                </p>
-                <a
-                  href="/product-category/men"
-                  className="text-purple-600 font-semibold hover:text-purple-700"
-                >
-                  Shop Men's →
-                </a>
-              </div>
-            </div>
-
-            {/* Accessories Category */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="aspect-w-16 aspect-h-9 bg-pink-100"></div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-2">Accessories</h3>
-                <p className="text-gray-600 mb-4">
-                  Complete your look with our festival accessories
-                </p>
-                <a
-                  href="/product-category/accessories"
-                  className="text-purple-600 font-semibold hover:text-purple-700"
-                >
-                  Shop Accessories →
-                </a>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
