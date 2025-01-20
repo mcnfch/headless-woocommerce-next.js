@@ -36,7 +36,7 @@ const Footer = () => {
           <div>
             <h3 className="text-xl font-bold mb-4">Groovy Gallery Designs</h3>
             <p className="text-gray-300">
-              Your one-stop shop for festival fashion and accessories.
+              Your one-stop shop for festival fashion, accessories, and groovy gear.
             </p>
           </div>
 

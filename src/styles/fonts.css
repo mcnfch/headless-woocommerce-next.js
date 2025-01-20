@@ -1,0 +1,7 @@
+@font-face {
+  font-family: 'Visby Round';
+  src: url('/fonts/VisbyRoundCF-Bold.woff2') format('woff2');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}

@@ -37,9 +37,18 @@ export const fetchMenu = async (menuId) => {
 
 // Transform URLs to use local routing
 function transformUrl(url) {
+  // Handle product category URLs
   if (url.includes('/product-category/')) {
     return `/category/${url.split('/product-category/')[1].replace(/\/$/, '')}`;
   }
+  
+  // Handle woo.groovygallerydesigns.com URLs
+  if (url.includes('woo.groovygallerydesigns.com')) {
+    // Extract the path part of the URL
+    const urlObj = new URL(url);
+    return urlObj.pathname.replace(/\/$/, '');
+  }
+  
   return url;
 }
 

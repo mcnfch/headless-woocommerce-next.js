@@ -56,7 +56,7 @@ export default function ProductGallery({ images }) {
       <div className="order-2 md:order-1 md:w-24 flex md:flex-col gap-2 overflow-x-auto md:overflow-y-auto scrollbar-hide pb-2 md:pb-0">
         {images.map((image, index) => (
           <button
-            key={image.src}
+            key={image.id}
             onClick={() => handleDotClick(index)}
             className={`relative flex-shrink-0 h-20 w-20 rounded-lg overflow-hidden border-2 ${
               currentIndex === index ? 'border-black' : 'border-transparent'
@@ -65,9 +65,9 @@ export default function ProductGallery({ images }) {
             <div className="relative h-full w-full">
               <Image
                 src={image.src}
-                alt={image.alt || ''}
-                fill
-                sizes="80px"
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
                 className="object-contain"
               />
             </div>
@@ -87,9 +87,9 @@ export default function ProductGallery({ images }) {
           <div className="relative h-full w-full bg-white rounded-lg">
             <Image
               src={images[currentIndex].src}
-              alt={images[currentIndex].alt || ''}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
+              alt={images[currentIndex].alt}
+              width={images[currentIndex].width}
+              height={images[currentIndex].height}
               className="object-contain"
               priority
             />

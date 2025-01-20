@@ -4,17 +4,27 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-purple-600 to-pink-500 text-white py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Festival Fashion & Accessories
+      <section className="relative py-20">
+        <Image
+          src="/images/gg_banner.png"
+          alt="Groovy Gallery Designs Banner"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="relative z-10 container mx-auto px-4 text-center flex flex-col items-center gap-6">
+          <h1 className="text-4xl md:text-6xl font-bold text-black">
+            Festival Fashion, Accessories & Groovy Gear
           </h1>
-          <p className="text-xl md:text-2xl mb-8">
+          <p className="text-xl md:text-2xl text-black">
             Express yourself with our unique collection of rave wear and festival gear
           </p>
+          <p className="text-xl md:text-2xl text-black">
+            Rizz up your campsite with our groovy gear
+          </p>
           <a
-            href="/product-category/new-arrivals"
-            className="inline-block bg-white text-purple-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+            href="/category/new-arrivals"
+            className="inline-block bg-black text-white px-8 py-3 rounded-full font-semibold hover:bg-gray-800 transition-colors mt-4"
           >
             Shop New Arrivals
           </a>
@@ -22,9 +32,9 @@ export default function Home() {
       </section>
 
       {/* Featured Categories */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Shop by Category</h2>
+          <h2 className="text-3xl font-bold text-center mb-12 text-black">Shop by Category</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Women's Category */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -76,28 +86,6 @@ export default function Home() {
                 </a>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Products Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">New Arrivals</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Product placeholders - will be replaced with actual products */}
-            {[1, 2, 3, 4].map((item) => (
-              <div key={item} className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="aspect-w-1 aspect-h-1 bg-gray-200"></div>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold mb-2">Festival Item {item}</h3>
-                  <p className="text-gray-600 mb-2">$49.99</p>
-                  <button className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700 transition-colors">
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>

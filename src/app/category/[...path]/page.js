@@ -1,11 +1,12 @@
 import { Redis } from 'ioredis';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
+import ProductCardSimple from '@/components/ProductCardSimple';
 
 // Dynamic import of ProductCard component
-const ProductCard = dynamic(() => import('../../../components/ProductCard'), {
-  loading: () => <p>Loading...</p>
-});
+// const ProductCard = dynamic(() => import('../../../components/ProductCard'), {
+//   loading: () => <p>Loading...</p>
+// });
 
 // Cache TTL in seconds (5 minutes)
 const CACHE_TTL = 300;
@@ -140,9 +141,9 @@ export default async function CategoryPage(props) {
             <p className="text-gray-600">No products found in this category.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCardSimple key={product.id} product={product} />
             ))}
           </div>
         )}

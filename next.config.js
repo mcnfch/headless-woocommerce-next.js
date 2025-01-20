@@ -8,7 +8,10 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   experimental: {
-    serverActions: true,
+    serverActions: {
+      allowedOrigins: ['localhost:3010', 'dev.groovygallerydesigns.com'],
+      bodySizeLimit: '2mb'
+    },
   },
 }
 
