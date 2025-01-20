@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { fetchMenu, organizeMenuItems } from '../utils/api';
 
 const decodeHTML = (html) => {
@@ -13,6 +14,7 @@ const decodeHTML = (html) => {
 const Header = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [expandedItems, setExpandedItems] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -34,12 +36,26 @@ const Header = () => {
     getMenuItems();
   }, []);
 
+  const toggleSubmenu = (itemId) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [itemId]: !prev[itemId]
+    }));
+  };
+
   return (
     <header className="bg-black">
       <nav className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold text-white">
-            Groovy Gallery Designs
+          <Link href="/" className="text-white">
+            <Image 
+              src="/images/gg_banner3.avif" 
+              alt="Groovy Gallery Designs"
+              width={300}
+              height={80}
+              priority
+              className="h-auto"
+            />
           </Link>
 
           {/* Mobile menu button */}
@@ -109,24 +125,54 @@ const Header = () => {
             ) : (
               menuItems.map((item) => (
                 <div key={item.id}>
-                  <Link
-                    href={item.url}
-                    className="block py-2 text-white"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {decodeHTML(item.title.rendered)}
-                  </Link>
-                  {item.children?.length > 0 && (
+                  <div className="flex items-center justify-between">
+                    <Link
+                      href={item.url}
+                      className="block py-2 text-white"
+                    >
+                      {decodeHTML(item.title.rendered)}
+                    </Link>
+                    {item.children?.length > 0 && (
+                      <button
+                        onClick={() => toggleSubmenu(item.id)}
+                        className="p-2 text-white hover:text-gray-300 focus:outline-none"
+                      >
+                        {expandedItems[item.id] ? '−' : '+'}
+                      </button>
+                    )}
+                  </div>
+                  {item.children?.length > 0 && expandedItems[item.id] && (
                     <div className="pl-4">
                       {item.children.map((child) => (
-                        <Link
-                          key={child.id}
-                          href={child.url}
-                          className="block py-2 text-sm text-white"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          {decodeHTML(child.title.rendered)}
-                        </Link>
+                        <div key={child.id} className="flex items-center justify-between">
+                          <Link
+                            href={child.url}
+                            className="block py-2 text-sm text-white"
+                          >
+                            {decodeHTML(child.title.rendered)}
+                          </Link>
+                          {child.children?.length > 0 && (
+                            <button
+                              onClick={() => toggleSubmenu(child.id)}
+                              className="p-2 text-white hover:text-gray-300 focus:outline-none"
+                            >
+                              {expandedItems[child.id] ? '−' : '+'}
+                            </button>
+                          )}
+                          {child.children?.length > 0 && expandedItems[child.id] && (
+                            <div className="pl-4">
+                              {child.children.map((grandchild) => (
+                                <Link
+                                  key={grandchild.id}
+                                  href={grandchild.url}
+                                  className="block py-2 text-sm text-white"
+                                >
+                                  {decodeHTML(grandchild.title.rendered)}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       ))}
                     </div>
                   )}

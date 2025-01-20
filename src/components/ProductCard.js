@@ -57,28 +57,15 @@ export default function ProductCard({ product }) {
       
       <div className="p-4">
         <h2 className="text-lg font-semibold mb-2 line-clamp-2">
-          <Link href={devPermalink} className="hover:text-blue-600">
+          <Link href={devPermalink} className="hover:text-blue-600 text-black">
             {name}
           </Link>
         </h2>
         
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {sale_price && (
-              <>
-                <span className="text-gray-400 line-through text-sm">
-                  ${regular_price}
-                </span>
-                <span className="text-red-600 font-bold">
-                  ${sale_price}
-                </span>
-              </>
-            )}
-            {!sale_price && (
-              <span className="font-bold">
-                ${price}
-              </span>
-            )}
+          <span className="text-black" style={{marginRight: '-7px'}}>$</span>
+            <span className="text-black font-bold">{price}</span>
           </div>
           
           <button 
