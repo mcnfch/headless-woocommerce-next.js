@@ -3,8 +3,14 @@ export type Product = {
     name: string;
     price: number;
     currency: string;
-    imageSrc: string;
-    imageAlt: string;
+    images: Array<{
+        src: string;
+        alt: string;
+    }>;
+    description?: string;
+    stock_status?: string;
+    regular_price?: string;
+    selectedOptions?: Record<string, string>;
 }
 
 export type CartItem = {
@@ -13,4 +19,6 @@ export type CartItem = {
     price: number;
     quantity: number;
     currency: string;
+    image: string;
+    selectedOptions?: Record<string, string>;
 }

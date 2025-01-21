@@ -9,7 +9,7 @@ export default async function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-20">
+      <section className="relative py-20 -mt-[40px]">
         <Image
           src="/images/gg_banner.png"
           alt="Groovy Gallery Designs Banner"
@@ -37,9 +37,11 @@ export default async function Home() {
       </section>
 
       {/* Featured Categories */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-transparent">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12 text-black">Shop by Category</h2>
+          <div className="flex justify-center mb-12">
+            <h2 className="text-3xl font-bold text-black backdrop-blur-md bg-white/75 py-4 rounded-lg px-8">Shop by Category</h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {categories.map((category) => (
               <div key={category.id} className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -54,7 +56,7 @@ export default async function Home() {
                     />
                   )}
                 </div>
-                <div className="p-6">
+                <div className="p-6 bg-white">
                   <h3 className="text-xl font-semibold mb-2 text-black">{category.name}</h3>
                   <p className="text-black mb-4">{category.description || `Explore our ${category.name} collection`}</p>
                   <a href={`/category/${category.slug}`} className="text-black font-semibold hover:text-purple-700">
@@ -74,7 +76,7 @@ export default async function Home() {
           <p className="text-xl mb-8">
             Subscribe to get updates on new arrivals and special offers
           </p>
-          <form className="max-w-md mx-auto flex gap-4">
+          <form className="max-w-md mx-auto flex gap-4 mb-12">
             <input
               type="email"
               placeholder="Enter your email"
@@ -87,6 +89,15 @@ export default async function Home() {
               Subscribe
             </button>
           </form>
+          <div className="mt-8">
+            <Image
+              src="/images/badges.png"
+              alt="Trust Badges"
+              width={800}
+              height={100}
+              className="mx-auto"
+            />
+          </div>
         </div>
       </section>
     </div>

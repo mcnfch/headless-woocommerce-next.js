@@ -86,3 +86,46 @@ export const fetchCategories = async () => {
     return [];
   }
 };
+
+export async function fetchFooterPages() {
+    const pageIds = {
+        'about-us': 8380,
+        'shipping': 8378,
+        'our-sustainability-practices': 8376,
+        'refunds-and-returns': 4203
+    };
+
+    const pages = {};
+    const baseUrl = process.env.PUBLIC_HTTP_ENDPOINT;
+    const headers = {
+        'Authorization': `Bearer ${process.env.PRIVATE_WP_JWT_TOKEN}`
+    };
+
+    try {
+        await Promise.all(
+            Object.entries(pageIds).map(async ([key, id]) => {
+                const response = await fetch(`${baseUrl}/wp-json/wp/v2/pages/${id}`, {
+                    headers,
+                    next: { revalidate: 3600 } // Cache for 1 hour
+                });
+
+                if (!response.ok) {
+                    console.error(`Failed to fetch ${key} page:`, response.statusText);
+                    return;
+                }
+
+                const data = await response.json();
+                pages[key] = {
+                    title: data.title.rendered,
+                    content: data.content.rendered,
+                    slug: data.slug
+                };
+            })
+        );
+
+        return pages;
+    } catch (error) {
+        console.error('Error fetching footer pages:', error);
+        return {};
+    }
+}

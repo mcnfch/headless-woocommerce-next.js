@@ -3,6 +3,7 @@
 import ProductForm from './ProductForm';
 import AddToCart from './cart/add-to-cart';
 import { useState } from 'react';
+import Image from 'next/image';
 
 export default function ProductDetails({ product, onAddToCart }) {
     const [isValid, setIsValid] = useState(false);
@@ -73,6 +74,16 @@ export default function ProductDetails({ product, onAddToCart }) {
                 selectedOptions={selectedOptions}
                 onAddToCart={onAddToCart}
             />
+
+            <div className="mt-8 flex justify-center">
+                <Image
+                    src="/images/badges.png"
+                    alt="Trust Badges"
+                    width={520}
+                    height={65}
+                    className="w-[130%] sm:w-[130%] md:w-[130%] lg:w-[130%] h-auto scale-[1.3]"
+                />
+            </div>
         </div>
     );
 }

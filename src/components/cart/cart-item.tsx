@@ -30,11 +30,16 @@ export default function CartItem({item}: Props) {
                     />
                 </div>
             )}
-            <div className="flex flex-col">
-                <div className="text-sm font-medium">{name}</div>
+            <div className="flex flex-col flex-grow min-w-0">
+                <div className="text-sm font-medium truncate">{name}</div>
                 <div className="text-sm text-gray-500">Qty: {quantity}</div>
+                {item.selectedOptions && Object.entries(item.selectedOptions).map(([key, value]) => (
+                    <div key={key} className="text-xs text-gray-500">
+                        {key}: {value}
+                    </div>
+                ))}
             </div>
-            <div className="ml-auto text-sm font-medium">
+            <div className="text-sm font-medium whitespace-nowrap">
                 {formatCurrencyString({value: price, currency: "USD"})}
             </div>
             <button

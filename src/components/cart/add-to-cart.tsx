@@ -21,7 +21,8 @@ export default function AddToCart({product, quantity, isEnabled = true, selected
             ...product,
             selectedOptions,
             price: Math.round(parseFloat(product.price) * 100), // Convert to cents
-            currency: 'USD'
+            currency: 'USD',
+            image: product.images?.[0]?.src || '', // Add the first image as the thumbnail
         };
         addItem(cartItem, { count: quantity });
         onAddToCart?.();

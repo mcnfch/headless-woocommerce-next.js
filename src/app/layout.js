@@ -5,6 +5,7 @@ import { initializeServer } from './init';
 import "./globals.css";
 import CartProvider from "@/components/provider";
 import Cart from "@/components/cart";
+import FreeShipping from "@/components/FreeShipping";
 import { Suspense } from "react";
 
 const geistSans = Geist({
@@ -36,6 +37,7 @@ export default async function RootLayout({ children }) {
               <Cart />
             </Suspense>
           </Header>
+         
           <Suspense>
             <main className="flex-grow glass-background">{children}</main>
           </Suspense>

@@ -35,7 +35,7 @@ export default function ProductCardSimple({ product }) {
   const devPermalink = permalink.replace('woo.groovygallerydesigns.com', 'dev.groovygallerydesigns.com');
   
   return (
-    <Link href={devPermalink} className="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <Link href={devPermalink} className="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
       <div className="relative aspect-square">
         <Image
           src={mainImage.src}
@@ -51,15 +51,10 @@ export default function ProductCardSimple({ product }) {
           loading="lazy"
         />
       </div>
-      
-      <div className="p-4">
-        <h2 className="text-lg font-semibold mb-2 line-clamp-2 text-black hover:text-blue-600">
-          {name}
-        </h2>
-        
-        <div className="flex items-center">
-          <span className="text-black" style={{marginRight: '-7px'}}>$</span>
-          <span className="text-black font-bold">{price}</span>
+      <div className="p-4 flex flex-col flex-grow">
+        <h3 className="font-medium text-gray-900 mb-2">{name}</h3>
+        <div className="mt-auto">
+          <p className="text-lg font-bold text-gray-900">${parseFloat(price).toFixed(2)}</p>
         </div>
       </div>
     </Link>

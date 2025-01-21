@@ -113,9 +113,17 @@ export default async function ProductPage({params}) {
                 {/* Frequently Bought Together Section */}
                 {relatedProducts?.length > 0 && (
                     <div className="py-8">
-                        <h2 className="mb-4 text-2xl font-bold">Frequently Bought Together</h2>
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                            {relatedProducts.map(product => <ProductCardSimple key={product.id} product={product}/>)}
+                        <h2 className="mb-4 text-2xl font-bold text-black text-center p-4 backdrop-blur-md bg-white/30 rounded-lg inline-block">
+                            Frequently Bought Together
+                        </h2>
+                        <div className="flex overflow-x-auto gap-4 pb-4 hide-scrollbar">
+                            {relatedProducts.map(product => (
+                                <div key={product.id} className="flex-none w-1/5 min-w-[200px] min-h-[440px]">
+                                    <div className="h-full">
+                                        <ProductCardSimple product={product}/>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 )}
