@@ -1,18 +1,26 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['woo.groovygallerydesigns.com'],
-    formats: ['image/webp'],
-    minimumCacheTTL: 60,
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'woo.groovygallerydesigns.com',
+        port: '',
+        pathname: '/wp-content/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'secure.gravatar.com',
+        port: '',
+        pathname: '/avatar/**',
+      },
+    ],
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3010', 'dev.groovygallerydesigns.com'],
-      bodySizeLimit: '2mb'
+      allowedOrigins: ['localhost:3010', 'woo.groovygallerydesigns.com'],
     },
   },
 }
 
-module.exports = nextConfig
+export default nextConfig;

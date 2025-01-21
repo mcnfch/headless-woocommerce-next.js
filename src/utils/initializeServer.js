@@ -1,7 +1,13 @@
+import dotenv from 'dotenv';
 import { Redis } from 'ioredis';
 import WooCommerceRestApi from '@woocommerce/woocommerce-rest-api';
+import { decode } from 'html-entities';
 
-const api = new WooCommerceRestApi({
+// Load environment variables
+dotenv.config();
+
+const WooCommerce = WooCommerceRestApi.default;
+const api = new WooCommerce({
   url: process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://woo.groovygallerydesigns.com',
   consumerKey: process.env.NEXT_PUBLIC_WOOCOMMERCE_KEY,
   consumerSecret: process.env.NEXT_PUBLIC_WOOCOMMERCE_SECRET,
@@ -45,15 +51,44 @@ async function loadProductDetails(productId) {
     const response = await api.get(`products/${productId}`);
     const product = response.data;
     
+    // Split attributes into single-option and multi-option
+    const defaultAttributes = {};
+    const multiOptionAttributes = [];
+    
+    if (product.attributes) {
+      product.attributes.forEach(attr => {
+        if (attr.options.length === 1) {
+          defaultAttributes[attr.name] = attr.options[0];
+        } else {
+          multiOptionAttributes.push(attr);
+        }
+      });
+    }
+    
+    // Decode HTML entities in text fields and create processed product
+    const processedProduct = {
+      ...product,
+      name: decode(product.name),
+      description: decode(product.description),
+      short_description: decode(product.short_description),
+      categories: product.categories.map(cat => ({
+        ...cat,
+        name: decode(cat.name),
+        description: decode(cat.description || '')
+      })),
+      attributes: multiOptionAttributes,
+      defaultAttributes
+    };
+    
     // Store by product ID
-    await redis.set(`product:${product.id}`, JSON.stringify(product));
+    await redis.set(`product:${processedProduct.id}`, JSON.stringify(processedProduct));
     
     // Store by slug for URL lookups
-    await redis.set(`product_slug:${product.slug}`, JSON.stringify(product));
+    await redis.set(`product_slug:${processedProduct.slug}`, JSON.stringify(processedProduct));
     
     // Store in category indexes
-    for (const category of product.categories) {
-      await redis.sadd(`category:${category.slug}`, product.id);
+    for (const category of processedProduct.categories) {
+      await redis.sadd(`category:${category.slug}`, processedProduct.id);
     }
     
     return true;

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { getTopLevelCategories } from "@/lib/woocommerce";
+import { getTopLevelCategories } from "../lib/woocommerce";
 
 export const revalidate = 3600; // Revalidate every hour
 

@@ -1,88 +1,99 @@
-'use client';
-
-import ProductForm from './ProductForm';
-import AddToCart from './cart/add-to-cart';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { formatPrice } from '../lib/utils';
 
-export default function ProductDetails({ product, onAddToCart }) {
-    const [isValid, setIsValid] = useState(false);
+export default function ProductDetails({ product }) {
     const [selectedOptions, setSelectedOptions] = useState({});
-    const [quantity, setQuantity] = useState(1);
+    const [allOptionsSelected, setAllOptionsSelected] = useState(false);
+
+    const handleOptionChange = (name, value) => {
+        const newOptions = { ...selectedOptions, [name]: value };
+        setSelectedOptions(newOptions);
+
+        // Check if all required options are selected
+        const requiredOptions = product.attributes.filter(attr => attr.variation);
+        const allSelected = requiredOptions.every(attr => newOptions[attr.name]);
+        setAllOptionsSelected(allSelected);
+    };
+
+    useEffect(() => {
+        if (product.attributes) {
+            console.log('Product Attributes:', product.attributes.map(attr => ({ id: attr.id, name: attr.name })));
+        }
+    }, [product.attributes]);
+
+    if (!product) return null;
 
     return (
-        <div className="basis-full lg:basis-2/6">
-            <h1 className="text-3xl font-bold mb-4 text-black">{product.name}</h1>
-
-            <div className="mb-4">
-                <p className="text-sm text-green-600">
-                    {product.stock_status === 'instock' ? 'In Stock' : 'Out of Stock'}
-                </p>
-            </div>
-
-            <div className="text-gray-600 mb-6" 
-                dangerouslySetInnerHTML={{ __html: product.description }} 
-            />
-
-            <div className="mb-6">
-                <p className="text-2xl font-bold text-black">${parseFloat(product.price).toFixed(2)}</p>
-                {product.regular_price && product.regular_price !== product.price && (
-                    <p className="text-gray-500 line-through">
-                        ${parseFloat(product.regular_price).toFixed(2)}
-                    </p>
-                )}
-            </div>
-
-            <div className="mb-6">
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => quantity > 1 && setQuantity(quantity - 1)}
-                        disabled={!product.stock_status === 'instock'}
-                        className="w-8 h-8 flex items-center justify-center border rounded hover:bg-gray-100 text-black"
-                        aria-label="Decrease quantity"
-                    >
-                        -
-                    </button>
-                    <span className="w-8 text-center text-black">{quantity}</span>
-                    <button
-                        onClick={() => quantity < 10 && setQuantity(quantity + 1)}
-                        disabled={!product.stock_status === 'instock'}
-                        className="w-8 h-8 flex items-center justify-center border rounded hover:bg-gray-100 text-black"
-                        aria-label="Increase quantity"
-                    >
-                        +
-                    </button>
+        <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:grid lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
+            {/* Product Image */}
+            <div className="lg:max-w-lg lg:self-end">
+                <div className="aspect-w-1 aspect-h-1 overflow-hidden rounded-lg">
+                    <Image
+                        src={product.images[0]?.src || '/placeholder.png'}
+                        alt={product.name}
+                        className="h-full w-full object-cover object-center"
+                        width={product.images[0]?.width || 800}
+                        height={product.images[0]?.height || 800}
+                    />
                 </div>
             </div>
 
-            <ProductForm 
-                product={product} 
-                onOptionsChange={(valid, options) => {
-                    setIsValid(valid);
-                    setSelectedOptions(options);
-                }} 
-            />
+            {/* Product Info */}
+            <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
+                <h1 className="text-3xl font-bold tracking-tight text-black">{product.name}</h1>
+                <div className="mt-3">
+                    <p className="text-3xl tracking-tight text-black">{formatPrice(product.price)}</p>
+                </div>
+                <div className="mt-6">
+                    <h3 className="sr-only">Description</h3>
+                    <div className="space-y-6 text-base text-black" dangerouslySetInnerHTML={{ __html: product.description }} />
+                </div>
 
-            {!isValid && (
-                <p className="text-red-500 text-sm mb-4">Please select all options before adding to cart</p>
-            )}
+                {/* Product Options */}
+                <div className="mt-6">
+                    {product.attributes?.map((attribute) => {
+                        console.log('Attribute key:', attribute.id);
+                        return (
+                        <div key={attribute.id} className="mb-4">
+                            <label className="block text-sm font-medium text-black mb-2">
+                                {attribute.name}
+                            </label>
+                            <select
+                                value={selectedOptions[attribute.name] || ''}
+                                onChange={(e) => handleOptionChange(attribute.name, e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-sky-500 focus:outline-none focus:ring-sky-500 sm:text-sm"
+                            >
+                                <option value="">Select {attribute.name}</option>
+                                {attribute.options.map((option) => {
+                                    console.log('Option key:', `${attribute.id}-${option}`);
+                                    return (
+                                    <option key={`${attribute.id}-${option}`} value={option}>
+                                        {option}
+                                    </option>
+                                )})}
+                            </select>
+                        </div>
+                    )})}
+                </div>
 
-            <AddToCart 
-                product={product}
-                quantity={quantity}
-                isEnabled={isValid && product.stock_status === 'instock'} 
-                selectedOptions={selectedOptions}
-                onAddToCart={onAddToCart}
-            />
-
-            <div className="mt-8 flex justify-center">
-                <Image
-                    src="/images/badges.png"
-                    alt="Trust Badges"
-                    width={520}
-                    height={65}
-                    className="w-[130%] sm:w-[130%] md:w-[130%] lg:w-[130%] h-auto scale-[1.3]"
-                />
+                {/* Add to Cart Section */}
+                <div className="mt-10 flex w-full flex-col space-y-4">
+                    {!allOptionsSelected && product.attributes?.length > 0 && (
+                        <p className="text-red-500 text-sm mb-4">Please select all options before adding to cart</p>
+                    )}
+                    <button
+                        disabled={!allOptionsSelected && product.attributes?.length > 0}
+                        className={`w-full py-3 px-8 flex items-center justify-center rounded-md border border-transparent text-base font-medium text-white ${
+                            !allOptionsSelected && product.attributes?.length > 0
+                                ? 'bg-gray-400 cursor-not-allowed'
+                                : 'bg-black hover:bg-gray-800'
+                        }`}
+                        onClick={() => console.log('Add to cart clicked')}
+                    >
+                        Add to Cart
+                    </button>
+                </div>
             </div>
         </div>
     );

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { fetchMenu, organizeMenuItems } from '../utils/api';
+import { useCart } from '@/hooks/useCart';
 import '../styles/fonts.css';
 
 const decodeHTML = (html) => {
@@ -18,6 +19,7 @@ const Header = ({ children }) => {
   const [expandedItems, setExpandedItems] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { handleCartClick, cartCount } = useCart();
 
   useEffect(() => {
     const getMenuItems = async () => {
@@ -62,7 +64,7 @@ const Header = ({ children }) => {
                 <div className="text-white">Error loading menu: {error}</div>
               ) : (
                 menuItems.map((item) => (
-                  <div key={item.id} className="relative group">
+                  <div key={`menu-${item.id}`} className="relative group">
                     <Link
                       href={item.url}
                       className="text-white py-2"
@@ -73,7 +75,7 @@ const Header = ({ children }) => {
                       <div className="absolute left-0 mt-2 w-48 bg-black rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
                         {item.children.map((child) => (
                           <Link
-                            key={child.id}
+                            key={`submenu-${child.id}`}
                             href={child.url}
                             className="block px-4 py-2 text-sm text-white hover:bg-gray-800"
                           >
@@ -87,7 +89,7 @@ const Header = ({ children }) => {
               )}
             </div>
 
-            {/* User and Cart Icons */}
+            {/* User Icon and Cart */}
             <div className="flex items-center space-x-4">
               {children}
               <Link href="/account" className="text-white hover:text-gray-300">
@@ -95,6 +97,22 @@ const Header = ({ children }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </Link>
+
+              {/* Shopping Bag */}
+              <button 
+                onClick={handleCartClick}
+                className="text-white hover:text-gray-300 relative"
+                aria-label="Shopping cart"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
 
               {/* Mobile menu button */}
               <button
@@ -131,55 +149,47 @@ const Header = ({ children }) => {
               <div className="text-white">Error loading menu: {error}</div>
             ) : (
               menuItems.map((item) => (
-                <div key={item.id}>
+                <div key={`mobile-${item.id}`}>
                   <div className="flex items-center justify-between">
                     <Link
                       href={item.url}
-                      className="block py-2 text-white"
+                      className="text-white py-2 block"
+                      onClick={() => setMobileMenuOpen(false)}
                     >
                       {decodeHTML(item.title.rendered)}
                     </Link>
                     {item.children?.length > 0 && (
                       <button
                         onClick={() => toggleSubmenu(item.id)}
-                        className="p-2 text-white hover:text-gray-300 focus:outline-none"
+                        className="p-2 text-white"
                       >
-                        {expandedItems[item.id] ? '−' : '+'}
+                        <svg
+                          className={`w-4 h-4 transform transition-transform ${
+                            expandedItems[item.id] ? 'rotate-180' : ''
+                          }`}
+                          fill="none"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path d="M19 9l-7 7-7-7" />
+                        </svg>
                       </button>
                     )}
                   </div>
                   {item.children?.length > 0 && expandedItems[item.id] && (
                     <div className="pl-4">
                       {item.children.map((child) => (
-                        <div key={child.id} className="flex items-center justify-between">
-                          <Link
-                            href={child.url}
-                            className="block py-2 text-sm text-white"
-                          >
-                            {decodeHTML(child.title.rendered)}
-                          </Link>
-                          {child.children?.length > 0 && (
-                            <button
-                              onClick={() => toggleSubmenu(child.id)}
-                              className="p-2 text-white hover:text-gray-300 focus:outline-none"
-                            >
-                              {expandedItems[child.id] ? '−' : '+'}
-                            </button>
-                          )}
-                          {child.children?.length > 0 && expandedItems[child.id] && (
-                            <div className="pl-4">
-                              {child.children.map((grandchild) => (
-                                <Link
-                                  key={grandchild.id}
-                                  href={grandchild.url}
-                                  className="block py-2 text-sm text-white"
-                                >
-                                  {decodeHTML(grandchild.title.rendered)}
-                                </Link>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                        <Link
+                          key={`mobile-submenu-${child.id}`}
+                          href={child.url}
+                          className="text-white py-2 block"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {decodeHTML(child.title.rendered)}
+                        </Link>
                       ))}
                     </div>
                   )}

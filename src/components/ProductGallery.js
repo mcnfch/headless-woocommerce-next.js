@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 
 export default function ProductGallery({ images }) {
@@ -35,6 +35,7 @@ export default function ProductGallery({ images }) {
 
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
+    
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
@@ -46,17 +47,26 @@ export default function ProductGallery({ images }) {
       handlePrevious();
     }
 
-    setTouchStart(0);
-    setTouchEnd(0);
+    // Reset touch states after processing
+    setTimeout(() => {
+      setTouchStart(0);
+      setTouchEnd(0);
+    }, 0);
   };
+
+  useEffect(() => {
+    console.log('Gallery Images:', images.map(img => ({ id: img.id, src: img.src })));
+  }, [images]);
 
   return (
     <div className="flex flex-col md:flex-row gap-4">
       {/* Thumbnail Gallery */}
       <div className="order-2 md:order-1 md:w-24 flex md:flex-col gap-2 overflow-x-auto md:overflow-y-auto scrollbar-hide pb-2 md:pb-0">
-        {images.map((image, index) => (
+        {images.map((image, index) => {
+          console.log('Thumb key:', `thumb-${image.id || image.src}-${index}`);
+          return (
           <button
-            key={image.id}
+            key={`thumb-${image.id || image.src}-${index}`}
             onClick={() => handleDotClick(index)}
             className={`relative flex-shrink-0 h-20 w-20 rounded-lg overflow-hidden border-2 ${
               currentIndex === index ? 'border-black' : 'border-transparent'
@@ -65,14 +75,14 @@ export default function ProductGallery({ images }) {
             <div className="relative h-full w-full">
               <Image
                 src={image.src}
-                alt={image.alt}
-                width={image.width}
-                height={image.height}
+                alt={image.alt || 'Product thumbnail'}
+                width={image.width || 800}
+                height={image.height || 800}
                 className="object-contain"
               />
             </div>
           </button>
-        ))}
+        )})}
       </div>
 
       {/* Main Image */}
@@ -87,9 +97,9 @@ export default function ProductGallery({ images }) {
           <div className="relative h-full w-full bg-white rounded-lg">
             <Image
               src={images[currentIndex].src}
-              alt={images[currentIndex].alt}
-              width={images[currentIndex].width}
-              height={images[currentIndex].height}
+              alt={images[currentIndex].alt || 'Product image'}
+              width={images[currentIndex].width || 1200}
+              height={images[currentIndex].height || 1200}
               className="object-contain"
               priority
             />
@@ -118,16 +128,18 @@ export default function ProductGallery({ images }) {
 
         {/* Dots */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-          {images.map((_, index) => (
+          {images.map((image, index) => {
+            console.log('Dot key:', `dot-${image.id || image.src}-${index}`);
+            return (
             <button
-              key={index}
+              key={`dot-${image.id || image.src}-${index}`}
               onClick={() => handleDotClick(index)}
               className={`w-2 h-2 rounded-full transition-colors ${
                 currentIndex === index ? 'bg-black' : 'bg-gray-300'
               }`}
               aria-label={`Go to image ${index + 1}`}
             />
-          ))}
+          )})}
         </div>
       </div>
     </div>

@@ -129,8 +129,8 @@ export default async function ProductPage({ params }) {
                 required={attribute.variation}
               >
                 <option value="">Select {attribute.name}</option>
-                {attribute.options.map(option => (
-                  <option key={option} value={option}>
+                {attribute.options.map((option, index) => (
+                  <option key={`${attribute.id || attribute.name}-${option}-${index}`} value={option}>
                     {option}
                   </option>
                 ))}

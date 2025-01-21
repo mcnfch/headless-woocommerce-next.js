@@ -1,6 +1,7 @@
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 
-const api = new WooCommerceRestApi({
+const WooCommerce = WooCommerceRestApi.default;
+const api = new WooCommerce({
   url: process.env.NEXT_PUBLIC_WOOCOMMERCE_URL,
   consumerKey: process.env.NEXT_PUBLIC_WOOCOMMERCE_KEY,
   consumerSecret: process.env.NEXT_PUBLIC_WOOCOMMERCE_SECRET,

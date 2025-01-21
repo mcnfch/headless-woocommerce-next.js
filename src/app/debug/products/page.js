@@ -97,7 +97,7 @@ export default function DebugProducts() {
                 <div className="space-y-2">
                   {loadingResults.map((result, index) => (
                     <div 
-                      key={index}
+                      key={`result-${result.id}-${index}`}
                       className={`p-2 rounded ${
                         result.status === 'success' 
                           ? 'bg-green-100 text-green-800' 

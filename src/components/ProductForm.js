@@ -8,16 +8,10 @@ export default function ProductForm({ product, onOptionsChange }) {
 
   // Initialize options, auto-selecting single options
   useEffect(() => {
-    if (product.attributes) {
-      const initialOptions = {};
-      product.attributes.forEach(attribute => {
-        if (attribute.options.length === 1) {
-          initialOptions[attribute.name] = attribute.options[0];
-        }
-      });
-      setSelectedOptions(initialOptions);
+    if (product.defaultAttributes) {
+      setSelectedOptions(product.defaultAttributes);
     }
-  }, [product]);
+  }, [product.defaultAttributes]);
 
   // Check if all required options are selected
   useEffect(() => {
@@ -28,7 +22,10 @@ export default function ProductForm({ product, onOptionsChange }) {
     const allSelected = selectedOptionsCount === requiredOptionsCount;
 
     setAllOptionsSelected(allSelected);
-    onOptionsChange?.(allSelected, selectedOptions);
+    onOptionsChange?.(allSelected, {
+      ...product.defaultAttributes,
+      ...selectedOptions
+    });
   }, [selectedOptions, product, onOptionsChange]);
 
   const handleOptionChange = (attributeName, value) => {
@@ -46,11 +43,10 @@ export default function ProductForm({ product, onOptionsChange }) {
 
   return (
     <div>
-      {/* Product Options */}
-      {product.attributes && [...new Set(product.attributes)]
-        .filter(attribute => attribute.options.length > 1) // Only show attributes with multiple options
-        .map((attribute) => (
-          <div key={attribute.name} className="mb-4">
+      {/* Only show multi-option attributes */}
+      {product.attributes && product.attributes.map((attribute) => {
+        return (
+          <div key={`form-attr-${attribute.id || attribute.name}`} className="mb-4">
             <label htmlFor={attribute.name} className="block text-sm font-medium text-black mb-2">
               {attribute.name}<span className="text-red-500">*</span>
             </label>
@@ -62,26 +58,15 @@ export default function ProductForm({ product, onOptionsChange }) {
               required
             >
               <option value="" className="text-black">Select {attribute.name}</option>
-              {[...new Set(attribute.options)].map((option) => (
-                <option key={option} value={option} className="text-black">
+              {[...new Set(attribute.options)].map((option, index) => (
+                <option key={`form-opt-${attribute.id || attribute.name}-${option}-${index}`} value={option} className="text-black">
                   {option}
                 </option>
               ))}
             </select>
           </div>
-        ))}
-
-      {/* Hidden inputs for single-option attributes */}
-      {product.attributes && [...new Set(product.attributes)]
-        .filter(attribute => attribute.options.length === 1)
-        .map((attribute) => (
-          <input
-            key={attribute.name}
-            type="hidden"
-            name={attribute.name}
-            value={attribute.options[0]}
-          />
-        ))}
+        );
+      })}
     </div>
   );
 }
