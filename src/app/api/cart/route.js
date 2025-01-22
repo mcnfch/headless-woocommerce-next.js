@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
+import { parsePrice } from '@/utils/price';
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 const CART_COOKIE = 'cart_id';
@@ -21,9 +22,7 @@ async function getOrCreateCart(cartId) {
 
 async function calculateTotal(items) {
   return items.reduce((sum, item) => {
-    const price = typeof item.price === 'string' 
-      ? parseFloat(item.price.replace(/[^0-9.]/g, ''))
-      : parseFloat(item.price) || 0;
+    const price = parsePrice(item.price);
     return sum + (price * item.quantity);
   }, 0);
 }
@@ -72,9 +71,7 @@ export async function POST(request) {
           cart.items.push({
             id: item.id,
             name: item.name,
-            price: typeof item.price === 'string' 
-              ? parseFloat(item.price.replace(/[^0-9.]/g, ''))
-              : parseFloat(item.price) || 0,
+            price: parsePrice(item.price),
             quantity: item.quantity || 1,
             variation: item.variation || {},
             images: Array.isArray(item.images) && item.images.length > 0

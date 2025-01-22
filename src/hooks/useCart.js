@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
+import { parsePrice } from '@/utils/price';
 
 const CartContext = createContext(null);
 
@@ -44,7 +45,13 @@ export function CartProvider({ children }) {
       const response = await fetch('/api/cart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify({
+          action: 'add-item',
+          item: {
+            ...data,
+            price: parsePrice(data.price)
+          }
+        })
       });
       
       if (!response.ok) {
@@ -54,8 +61,10 @@ export function CartProvider({ children }) {
       
       const updatedCart = await response.json();
       setCart(updatedCart);
+      setIsOpen(true); // Open cart slider when item is added
     } catch (error) {
       console.error('Failed to add item to cart:', error);
+      throw error;
     }
   };
 
@@ -73,6 +82,7 @@ export function CartProvider({ children }) {
       setCart(updatedCart);
     } catch (error) {
       console.error('Failed to remove item:', error);
+      throw error;
     }
   };
 
@@ -91,6 +101,17 @@ export function CartProvider({ children }) {
       setCart(updatedCart);
     } catch (error) {
       console.error('Failed to update quantity:', error);
+      throw error;
+    }
+  };
+
+  const clearCart = async () => {
+    try {
+      await fetch('/api/cart/clear', { method: 'POST' });
+      setCart({ items: [], total: 0 });
+    } catch (error) {
+      console.error('Failed to clear cart:', error);
+      throw error;
     }
   };
 
@@ -102,18 +123,42 @@ export function CartProvider({ children }) {
     setIsOpen(false);
   };
 
+  // Format cart data for Stripe
+  const formatStripeItems = () => {
+    return cart.items.map(item => ({
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: item.name,
+          images: item.images
+        },
+        unit_amount: Math.round(parsePrice(item.price) * 100) // Convert to cents
+      },
+      quantity: item.quantity
+    }));
+  };
+
+  // Get cart total in cents for Stripe
+  const getStripeTotalAmount = () => {
+    return Math.round(cart.total * 100);
+  };
+
   return (
     <CartContext.Provider
       value={{
         cart,
+        loading,
+        isOpen,
+        cartCount,
         addItem,
         removeItem,
         updateQuantity,
-        isOpen,
+        clearCart,
         handleCartClick,
         closeCart,
-        loading,
-        cartCount
+        fetchCart,
+        formatStripeItems,
+        getStripeTotalAmount
       }}
     >
       {children}

@@ -5,6 +5,7 @@ export const revalidate = 3600; // Revalidate every hour
 
 export default async function Home() {
   const categories = await getTopLevelCategories();
+  console.log('Categories on homepage:', JSON.stringify(categories, null, 2));
 
   return (
     <div className="min-h-screen">
@@ -45,7 +46,7 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {categories.map((category) => (
               <div key={category.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                <div className="aspect-w-16 aspect-h-9 relative">
+                <div className="aspect-w-16 aspect-h-9 relative h-[300px]">
                   {category.image && (
                     <Image
                       src={category.image.src}
