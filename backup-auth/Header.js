@@ -24,8 +24,9 @@ const Header = ({ children }) => {
   const [expandedItems, setExpandedItems] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { handleCartClick, cartCount } = useCart();
-  const { user, openLogin } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -51,6 +52,15 @@ const Header = ({ children }) => {
       ...prev,
       [itemId]: !prev[itemId]
     }));
+  };
+
+  const handleUserIconClick = () => {
+    if (user) {
+      // Use window.location for a hard navigation
+      window.location.href = '/account';
+    } else {
+      setIsAuthModalOpen(true);
+    }
   };
 
   return (
@@ -99,17 +109,19 @@ const Header = ({ children }) => {
             {/* User Icon and Cart */}
             <div className="flex items-center space-x-4">
               {children}
-              <div className="ml-4">
+              <button
+                onClick={handleUserIconClick}
+                className={`p-2 rounded-full transition-colors ${
+                  user ? 'hover:bg-gray-800' : 'hover:bg-gray-800'
+                }`}
+                aria-label={user ? 'View Account' : 'Sign In'}
+              >
                 {user ? (
-                  <Link href="/account" className="inline-block">
-                    <UserIconSolid className="h-6 w-6 text-white cursor-pointer" />
-                  </Link>
+                  <UserIconSolid className="h-6 w-6 text-white" />
                 ) : (
-                  <button onClick={openLogin}>
-                    <UserIconOutline className="h-6 w-6 text-white cursor-pointer" />
-                  </button>
+                  <UserIconOutline className="h-6 w-6 text-white" />
                 )}
-              </div>
+              </button>
 
               {/* Shopping Bag */}
               <button 
@@ -214,8 +226,8 @@ const Header = ({ children }) => {
       </nav>
 
       <AuthModal
-        isOpen={false}
-        onClose={() => {}}
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
       />
     </header>
   );

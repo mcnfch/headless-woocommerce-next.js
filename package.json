@@ -20,6 +20,7 @@
     "dotenv": "^16.4.7",
     "html-entities": "^2.5.2",
     "ioredis": "^5.4.2",
+    "iron-session": "^8.0.4",
     "next": "15.1.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
