@@ -101,12 +101,15 @@ const Header = ({ children }) => {
               {children}
               <div className="ml-4">
                 {user ? (
-                  <Link href="/account" className="inline-block">
-                    <UserIconSolid className="h-6 w-6 text-white cursor-pointer" />
+                  <Link href="/account" className="inline-block" aria-label="View your account">
+                    <UserIconSolid className="h-6 w-6 text-white cursor-pointer" aria-hidden="true" />
                   </Link>
                 ) : (
-                  <button onClick={openLogin}>
-                    <UserIconOutline className="h-6 w-6 text-white cursor-pointer" />
+                  <button 
+                    onClick={openLogin}
+                    aria-label="Sign in to your account"
+                  >
+                    <UserIconOutline className="h-6 w-6 text-white cursor-pointer" aria-hidden="true" />
                   </button>
                 )}
               </div>
@@ -115,13 +118,13 @@ const Header = ({ children }) => {
               <button 
                 onClick={handleCartClick}
                 className="text-white hover:text-gray-300 relative"
-                aria-label="Shopping cart"
+                aria-label={`Shopping cart${cartCount > 0 ? `, ${cartCount} items` : ', empty'}`}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold" aria-hidden="true">
                     {cartCount}
                   </span>
                 )}
@@ -131,7 +134,9 @@ const Header = ({ children }) => {
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="md:hidden p-2 text-white"
-                aria-label="Toggle menu"
+                aria-label={`${mobileMenuOpen ? 'Close' : 'Open'} menu`}
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-menu"
               >
                 <svg
                   className="w-6 h-6"
@@ -141,6 +146,7 @@ const Header = ({ children }) => {
                   strokeWidth="2"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
+                  aria-hidden="true"
                 >
                   {mobileMenuOpen ? (
                     <path d="M6 18L18 6M6 6l12 12" />
@@ -155,7 +161,7 @@ const Header = ({ children }) => {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden mt-4">
+          <div className="md:hidden mt-4" id="mobile-menu">
             {loading ? (
               <div className="text-white">Loading menu...</div>
             ) : error ? (

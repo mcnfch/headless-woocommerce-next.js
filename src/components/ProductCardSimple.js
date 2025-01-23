@@ -38,26 +38,32 @@ export default function ProductCardSimple({ product }) {
   const devPermalink = frontendDomain + '/product/' + slug;
   
   return (
-    <Link href={devPermalink} className="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
-      <div className="relative aspect-square">
+    <Link 
+      href={devPermalink} 
+      className="block bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 h-full flex flex-col"
+      aria-label={`View ${name}`}
+    >
+      <div className="relative aspect-[1/1.2] sm:aspect-square">
         <Image
           src={mainImage.src}
-          alt={mainImage.alt || name}
+          alt={mainImage.alt || `Product image of ${name}`}
           width={imageWidth}
           height={imageHeight}
-          className="object-cover w-full h-full hover:scale-105 transition-transform duration-300"
+          className="object-cover w-full h-full"
           priority={false}
           quality={75}
           placeholder="blur"
           blurDataURL={`data:image/svg+xml;base64,${toBase64(shimmer(imageWidth, imageHeight))}`}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           loading="lazy"
         />
       </div>
-      <div className="p-4 flex flex-col flex-grow">
-        <h3 className="font-medium text-gray-900 mb-2">{name}</h3>
-        <div className="mt-auto">
-          <p className="text-lg font-bold text-gray-900">${parseFloat(price).toFixed(2)}</p>
+      <div className="p-2 sm:p-4 flex flex-col flex-grow">
+        <h3 className="font-medium text-gray-900 text-sm sm:text-base line-clamp-2">{name}</h3>
+        <div className="mt-1 sm:mt-auto">
+          <p className="text-base sm:text-lg font-bold text-gray-900" aria-label={`Price: $${parseFloat(price).toFixed(2)}`}>
+            ${parseFloat(price).toFixed(2)}
+          </p>
         </div>
       </div>
     </Link>

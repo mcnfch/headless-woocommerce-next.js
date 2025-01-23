@@ -78,6 +78,16 @@ async function getProductsByCategory(slug) {
   }
 }
 
+async function getProductsAndCategory(path) {
+  const lastSlug = path[path.length - 1];
+  const products = await getProductsByCategory(lastSlug);
+  const category = products.length > 0 
+    ? products[0].categories.find(cat => cat.slug === lastSlug) 
+    : null;
+
+  return { products, category };
+}
+
 function formatCategoryTitle(slug) {
   return slug
     .split('-')
@@ -85,69 +95,25 @@ function formatCategoryTitle(slug) {
     .join(' ');
 }
 
-export default async function CategoryPage(props) {
-  // Await params in the main component
-  const params = await props.params;
-  const lastSlug = params.path[params.path.length - 1];
-  
-  // Fetch products for the category
-  const products = await getProductsByCategory(lastSlug);
-  
-  const categoryTitle = products.length > 0 
-    ? products[0].categories.find(cat => cat.slug === lastSlug)?.name || formatCategoryTitle(lastSlug)
-    : formatCategoryTitle(lastSlug);
-
-  // Generate structured data with awaited params
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": categoryTitle,
-    "description": `Discover our collection of ${categoryTitle.toLowerCase()}`,
-    "url": `https://woo.groovygallerydesigns.com/category/${params.path.join('/')}`,
-    "numberOfItems": products.length,
-    "itemListElement": products.map((product, index) => ({
-      "@type": "Product",
-      "position": index + 1,
-      "name": product.name,
-      "description": product.description.replace(/<[^>]*>/g, ''),
-      "image": product.images[0]?.src || '',
-      "url": product.permalink,
-      "sku": product.sku,
-      "brand": {
-        "@type": "Brand",
-        "name": "Groovy Gallery Designs"
-      },
-      "offers": {
-        "@type": "Offer",
-        "price": product.price,
-        "priceCurrency": "USD",
-        "availability": "https://schema.org/InStock"
-      }
-    }))
-  };
+export default async function CategoryPage({ params }) {
+  const { path } = params;
+  const { products, category } = await getProductsAndCategory(path);
 
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
-      <div className="container mx-auto px-4 py-4">
-        <h1 className="text-xl md:text-2xl font-bold mb-4 glass-title">
-          {categoryTitle}
-        </h1>
-        {products.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-600">No products found in this category.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <ProductCardSimple key={product.id} product={product} />
-            ))}
-          </div>
-        )}
+    <main className="container mx-auto px-4 py-8" role="main" aria-label={`${category?.name || 'Category'} page`}>
+      <h1 className="text-3xl font-bold mb-8 text-gray-900">{category?.name || 'Products'}</h1>
+      <div 
+        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6"
+        role="region" 
+        aria-label={`${category?.name || 'Product'} grid`}
+      >
+        {products?.map((product) => (
+          <ProductCardSimple key={product.id} product={product} />
+        ))}
       </div>
-    </>
+      {products?.length === 0 && (
+        <p className="text-center text-gray-900" role="alert">No products found in this category.</p>
+      )}
+    </main>
   );
 }
