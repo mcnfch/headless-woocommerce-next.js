@@ -2,11 +2,20 @@ import { NextResponse } from 'next/server';
 import { getIronSession } from 'iron-session';
 import { sessionOptions } from '@/lib/session-config';
 import { parsePrice, formatWooCommercePrice, isValidPrice } from '@/utils/price';
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_TEST);
 
 export async function POST(request) {
   try {
     const session = await getIronSession(request.cookies, sessionOptions);
     const { shipping, items, paymentIntentId } = await request.json();
+
+    // Verify payment intent first
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    if (!paymentIntent || paymentIntent.status !== 'succeeded') {
+      throw new Error('Invalid or incomplete payment');
+    }
 
     console.log('Received request data:', {
       shipping,
@@ -52,8 +61,25 @@ export async function POST(request) {
       sum + parsePrice(item.total), 0
     );
 
-    console.log('Order total calculated:', orderTotal);
-    console.log('Line items:', lineItems);
+    // Verify the order total matches the payment intent amount
+    const stripeAmount = paymentIntent.amount;
+    const stripeTotal = stripeAmount / 100; // Convert from cents
+    
+    // Get any discount from payment intent metadata
+    const couponCode = paymentIntent.metadata.couponCode;
+    const displayAmount = parseFloat(paymentIntent.metadata.displayAmount);
+
+    // Verify amounts match
+    if (Math.abs(displayAmount - stripeTotal) > 0.01) { // Allow for small rounding differences
+      throw new Error(`Payment amount mismatch. Expected: ${displayAmount}, Got: ${stripeTotal}`);
+    }
+
+    console.log('Amount verification passed:', {
+      orderTotal: orderTotal,
+      stripeAmount: stripeAmount,
+      stripeTotal: stripeTotal,
+      displayAmount: displayAmount
+    });
 
     const orderData = {
       status: 'processing',
@@ -77,11 +103,15 @@ export async function POST(request) {
         total: item.total,
         price: item.price
       })),
-      total: formatWooCommercePrice(orderTotal),
+      total: formatWooCommercePrice(stripeTotal), // Use the verified Stripe amount
       meta_data: [
         {
           key: 'stripe_payment_intent_id',
           value: paymentIntentId
+        },
+        {
+          key: 'coupon_code',
+          value: couponCode
         }
       ]
     };
@@ -99,17 +129,20 @@ export async function POST(request) {
     });
 
     const responseText = await response.text();
-    console.log('WooCommerce response:', responseText);
-
+    
     if (!response.ok) {
-      console.error('Failed to create WooCommerce order:', responseText);
-      throw new Error('Failed to create order');
+      console.error('WooCommerce API error:', responseText);
+      throw new Error('Failed to create order in WooCommerce');
     }
 
     const order = JSON.parse(responseText);
-    return NextResponse.json({ order });
+    return NextResponse.json({ orderId: order.id });
+
   } catch (error) {
-    console.error('Error creating order:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Order creation failed:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to create order' },
+      { status: 500 }
+    );
   }
 }

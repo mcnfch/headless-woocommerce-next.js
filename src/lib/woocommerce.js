@@ -33,18 +33,10 @@ export async function getTopLevelCategories() {
 
     const data = await response.json();
 
-    console.log('Raw WooCommerce categories:', data);
-
     // Filter and sort categories according to our desired order
     const categories = desiredCategories
       .map(slug => data.find(cat => cat.slug === slug))
       .filter(Boolean);
-
-    console.log('Filtered categories with images:', categories.map(cat => ({
-      slug: cat.slug,
-      hasImage: !!cat.image,
-      imageUrl: cat.image?.src
-    })));
 
     return categories.map(category => ({
       id: category.id,

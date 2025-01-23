@@ -6,14 +6,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_TEST);
 
 export async function POST(request) {
   try {
-    const { items } = await request.json();
+    const { amount, cartId, couponCode, shipping } = await request.json();
 
-    // Calculate total amount from items (convert to cents for Stripe)
-    const amount = Math.round(items.reduce((total, item) => {
-      return total + (item.price * item.quantity);
-    }, 0) * 100); // Convert to cents
-
-    if (amount < 50) { // Stripe minimum amount is 50 cents
+    if (!amount || amount < 50) { // Stripe minimum amount is 50 cents
       throw new Error('Order total must be at least $0.50');
     }
 
@@ -25,12 +20,9 @@ export async function POST(request) {
         enabled: true,
       },
       metadata: {
-        items: JSON.stringify(items.map(item => ({
-          id: item.id,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price
-        })))
+        cartId,
+        couponCode,
+        shipping: JSON.stringify(shipping)
       }
     });
 
@@ -39,10 +31,9 @@ export async function POST(request) {
     });
   } catch (error) {
     console.error('Error creating payment intent:', error);
-    return NextResponse.json({ 
-      error: error.message 
-    }, { 
-      status: error.message.includes('must be at least') ? 400 : 500 
-    });
+    return NextResponse.json(
+      { error: error.message || 'Failed to create payment intent' },
+      { status: 500 }
+    );
   }
 }

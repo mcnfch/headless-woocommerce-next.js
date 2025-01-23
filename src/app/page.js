@@ -5,43 +5,28 @@ export const revalidate = 3600; // Revalidate every hour
 
 export default async function Home() {
   const categories = await getTopLevelCategories();
-  console.log('Categories on homepage:', JSON.stringify(categories, null, 2));
 
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-20 -mt-[40px]">
+      <section className="bg-gradient-to-r from-[#FF6EC7] via-[#6A82FB] to-[#FFD200] flex justify-center">
         <Image
-          src="/images/gg_banner.png"
-          alt="Groovy Gallery Designs Banner"
-          fill
-          className="object-cover"
+          src="/images/winter25.png"
+          alt="Winter 25 Sale"
+          width={350}
+          height={200}
           priority
+          className="!w-[350px] !h-[200px]"
         />
-        <div className="relative z-10 container mx-auto px-4 text-center flex flex-col items-center gap-6">
-          <h1 className="text-4xl md:text-6xl font-bold text-black">
-            Festival Fashion, Accessories & Groovy Gear
-          </h1>
-          <p className="text-xl md:text-2xl text-black">
-            Express yourself with our unique collection of rave wear and festival gear
-          </p>
-          <p className="text-xl md:text-2xl text-black">
-            Rizz up your campsite with our groovy gear
-          </p>
-          <a
-            href="/category/new-arrivals"
-            className="inline-block bg-black text-white px-8 py-3 rounded-full font-semibold hover:bg-gray-800 transition-colors mt-4"
-          >
-            Shop New Arrivals
-          </a>
-        </div>
       </section>
 
       {/* Featured Categories */}
-      <section className="py-16 bg-transparent">
+      <section className="py-4 md:py-8 bg-transparent">
         <div className="container mx-auto px-4">
-          <div className="flex justify-center mb-12">
-            <h2 className="text-3xl font-bold text-black backdrop-blur-md bg-white/75 py-4 rounded-lg px-8">Shop by Category</h2>
+          <div className="text-center mb-2">
+            <h2 className="text-lg md:text-xl font-bold text-black backdrop-blur-md bg-white/75 py-1 md:py-2 rounded-lg px-4 md:px-6 inline-block">
+              Shop by Category
+            </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {categories.map((category) => (

@@ -18,7 +18,6 @@ export default function ProductDetails({ product }) {
 
     useEffect(() => {
         if (product.attributes) {
-            console.log('Product Attributes:', product.attributes.map(attr => ({ id: attr.id, name: attr.name })));
         }
     }, [product.attributes]);
 
@@ -53,7 +52,6 @@ export default function ProductDetails({ product }) {
                 {/* Product Options */}
                 <div className="mt-6">
                     {product.attributes?.map((attribute) => {
-                        console.log('Attribute key:', attribute.id);
                         return (
                         <div key={attribute.id} className="mb-4">
                             <label className="block text-sm font-medium text-black mb-2">
@@ -66,7 +64,6 @@ export default function ProductDetails({ product }) {
                             >
                                 <option value="">Select {attribute.name}</option>
                                 {attribute.options.map((option) => {
-                                    console.log('Option key:', `${attribute.id}-${option}`);
                                     return (
                                     <option key={`${attribute.id}-${option}`} value={option}>
                                         {option}

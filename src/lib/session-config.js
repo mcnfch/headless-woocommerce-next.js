@@ -1,15 +1,6 @@
 // Next.js automatically loads environment variables
 const sessionPassword = process.env.SESSION_PASSWORD;
 
-// Debug environment variables
-console.log('Environment check:', {
-  NODE_ENV: process.env.NODE_ENV,
-  SESSION_PASSWORD_EXISTS: !!process.env.SESSION_PASSWORD,
-  SESSION_PASSWORD_LENGTH: process.env.SESSION_PASSWORD?.length,
-  ALL_ENV_KEYS: Object.keys(process.env),
-  ACTUAL_PASSWORD: process.env.SESSION_PASSWORD // Only for debugging, remove in production
-});
-
 if (!sessionPassword) {
   console.error('Session password is missing!');
   throw new Error('SESSION_PASSWORD environment variable must be set');

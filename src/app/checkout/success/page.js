@@ -2,15 +2,20 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCart } from '@/hooks/useCart';
 
 export default function SuccessPage() {
   const { clearCart } = useCart();
+  const router = useRouter();
 
   useEffect(() => {
-    // Clear cart on success page load
     clearCart();
-  }, [clearCart]);
+    const timer = setTimeout(() => {
+      router.push('/');
+    }, 15000);
+    return () => clearTimeout(timer);
+  }, [clearCart, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

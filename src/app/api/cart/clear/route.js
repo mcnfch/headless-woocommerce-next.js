@@ -27,7 +27,6 @@ export async function POST(request) {
     if (session.cart) {
       delete session.cart;
       await session.save();
-      console.log('Cleared session cart');
     }
 
     return NextResponse.json({ success: true });

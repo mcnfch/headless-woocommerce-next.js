@@ -5,32 +5,38 @@ import CartControls from '@/components/cart/CartControls';
 import ProductCard from '@/components/ProductCard';
 
 export default function ProductDetails({ product, relatedProducts }) {
+  // Use environment variables for domain
+  const frontendDomain = process.env.NEXT_PUBLIC_FRONTEND_URL || '';
+  const productUrl = `${frontendDomain}/product/${product.slug}`;
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "description": product.description.replace(/<[^>]*>/g, ''),
+    "image": product.images.map(img => img.src),
+    "sku": product.sku,
+    "brand": {
+      "@type": "Brand",
+      "name": "Groovy Gallery Designs"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": productUrl,
+      "priceCurrency": "USD",
+      "price": product.price,
+      "availability": product.stock_status === 'instock'
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock"
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org/",
-            "@type": "Product",
-            "name": product.name,
-            "description": product.description.replace(/<[^>]*>/g, ''),
-            "image": product.images.map(img => img.src),
-            "sku": product.sku,
-            "brand": {
-              "@type": "Brand",
-              "name": "Groovy Gallery Designs"
-            },
-            "offers": {
-              "@type": "Offer",
-              "url": `https://groovygallerydesigns.com/product/${product.slug}`,
-              "priceCurrency": "USD",
-              "price": product.price,
-              "availability": product.stock_status === 'instock'
-                ? "https://schema.org/InStock"
-                : "https://schema.org/OutOfStock"
-            }
-          })
+          __html: JSON.stringify(structuredData)
         }}
       />
 

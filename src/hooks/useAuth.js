@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
 
   const checkAuth = useCallback(async () => {
     try {
-      console.log('Starting auth check...');
+      setLoading(true);
       const response = await fetch('/api/auth/check', {
         credentials: 'include',
         headers: {
@@ -31,18 +31,17 @@ export function AuthProvider({ children }) {
       });
       
       const data = await response.json();
-      console.log('Auth check response data:', data);
       
       if (!response.ok) {
-        console.error('Auth check failed:', data);
         setUser(null);
         return;
       }
 
       setUser(data.user);
     } catch (error) {
-      console.error('Auth check error:', error);
       setUser(null);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -69,7 +68,6 @@ export function AuthProvider({ children }) {
   const login = async ({ username, password }) => {
     try {
       setLoading(true);
-      console.log('Starting login process...');
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         credentials: 'include',
@@ -83,19 +81,14 @@ export function AuthProvider({ children }) {
 
       const data = await response.json();
       if (!response.ok) {
-        console.error('Login failed:', data);
         throw new Error(data.error || 'Login failed');
       }
 
-      console.log('Login successful, setting user data...');
       setUser(data.user);
       await checkAuth();
       
-      // Transition to post-login state
-      console.log('Showing post-login modal...');
       setAuthState(AUTH_STATE.POST_LOGIN);
     } catch (error) {
-      console.error('Login error:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -113,12 +106,10 @@ export function AuthProvider({ children }) {
         throw new Error('Logout failed');
       }
 
-      // Clear all state
       setUser(null);
       setAuthState(AUTH_STATE.CLOSED);
       setLoading(true);
       
-      // Force a hard reload to clear any cached state
       window.location.href = '/';
     } catch (error) {
       console.error('Logout error:', error);

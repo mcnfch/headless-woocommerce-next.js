@@ -41,21 +41,22 @@ export default function CartControls({ product }) {
     };
 
     const cartItem = {
-      action: 'add-item',
-      item: {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: quantity,
-        images: product.images,
-        variation: finalVariations,
-        key: `${product.id}-${Object.values(finalVariations).join('-')}`
-      }
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: quantity,
+      images: product.images,
+      variation: finalVariations,
+      key: `${product.id}-${Object.values(finalVariations).join('-')}`
     };
 
-    console.log('Adding item to cart:', cartItem);
-    addItem(cartItem);
-    handleCartClick();
+    try {
+      addItem(cartItem);
+      handleCartClick(); // Open cart after adding item
+    } catch (error) {
+      setError('Failed to add item to cart');
+      console.error('Add to cart error:', error);
+    }
   };
 
   return (

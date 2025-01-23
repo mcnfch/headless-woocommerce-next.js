@@ -23,7 +23,7 @@ const toBase64 = (str) =>
     : window.btoa(str);
 
 export default function ProductCardSimple({ product }) {
-  const { name, images, price, permalink } = product;
+  const { name, images, price, permalink, slug } = product;
   const mainImage = images[0];
   
   if (!mainImage) {
@@ -32,7 +32,10 @@ export default function ProductCardSimple({ product }) {
 
   const imageWidth = 800;
   const imageHeight = 800;
-  const devPermalink = permalink.replace('woo.groovygallerydesigns.com', 'dev.groovygallerydesigns.com');
+  
+  // Use environment variables for domain
+  const frontendDomain = process.env.NEXT_PUBLIC_FRONTEND_URL || '';
+  const devPermalink = frontendDomain + '/product/' + slug;
   
   return (
     <Link href={devPermalink} className="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">

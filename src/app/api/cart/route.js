@@ -50,17 +50,15 @@ export async function POST(request) {
 
     const cart = await getOrCreateCart(cartId);
     const requestData = await request.json();
-    console.log('Cart API received data:', JSON.stringify(requestData, null, 2));
     
     const { action, ...data } = requestData;
 
     switch (action) {
       case 'add-item': {
-        console.log('Adding item to cart:', JSON.stringify(data, null, 2));
         const { item } = data;
-        if (!item || !item.id) {
+        if (!item || !item.id || typeof item.price === 'undefined') {
           console.error('Invalid item data received:', data);
-          throw new Error('Invalid item data');
+          return NextResponse.json({ error: 'Invalid item data' }, { status: 400 });
         }
 
         const existingItem = cart.items.find(i => i.key === item.key);
@@ -71,13 +69,11 @@ export async function POST(request) {
           cart.items.push({
             id: item.id,
             name: item.name,
-            price: parsePrice(item.price),
+            price: parseFloat(item.price) || 0,
             quantity: item.quantity || 1,
+            images: item.images || [],
             variation: item.variation || {},
-            images: Array.isArray(item.images) && item.images.length > 0
-              ? item.images.map(img => typeof img === 'string' ? img : img.src || '')
-              : [],
-            key: item.key || `${item.id}-${Object.values(item.variation || {}).join('-')}`
+            key: item.key
           });
         }
         break;

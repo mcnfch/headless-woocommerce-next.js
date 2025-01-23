@@ -132,8 +132,8 @@ export default async function CategoryPage(props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8 glass-title">
+      <div className="container mx-auto px-4 py-4">
+        <h1 className="text-xl md:text-2xl font-bold mb-4 glass-title">
           {categoryTitle}
         </h1>
         {products.length === 0 ? (

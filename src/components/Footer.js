@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { fetchFooterPages } from '@/utils/api';
+import BlogCarousel from '@/components/BlogCarousel';
+import { FaFacebook, FaInstagram, FaTiktok, FaPinterest } from 'react-icons/fa';
 
 export default async function Footer() {
     const footerPages = await fetchFooterPages();
@@ -15,19 +17,31 @@ export default async function Footer() {
                 { name: 'Refunds and Returns', href: '/refunds-and-returns', key: 'refunds-and-returns' },
             ],
         },
-        {
-            title: 'Connect',
-            links: [
-                { name: 'Instagram', href: 'https://instagram.com/groovygallerydesigns', external: true },
-                { name: 'Facebook', href: 'https://facebook.com/groovygallerydesigns', external: true },
-                { name: 'TikTok', href: 'https://tiktok.com/@groovygallerydesigns', external: true },
-            ],
-        },
     ];
 
     return (
         <footer className="bg-black text-white">
-            <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+                {/* Social Icons - Mobile First */}
+                <div className="flex justify-center space-x-4 sm:space-x-6 py-4">
+                    <Link href="https://www.facebook.com/groovygalleryd" target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">
+                        <FaFacebook className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="sr-only">Facebook</span>
+                    </Link>
+                    <Link href="https://www.instagram.com/groovygallerydesigns" target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">
+                        <FaInstagram className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="sr-only">Instagram</span>
+                    </Link>
+                    <Link href="https://www.tiktok.com/@groovygallerydesigns" target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">
+                        <FaTiktok className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="sr-only">TikTok</span>
+                    </Link>
+                    <Link href="https://www.pinterest.com/groovygallerydesigns" target="_blank" rel="noopener noreferrer" className="hover:text-purple-400 transition-colors">
+                        <FaPinterest className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="sr-only">Pinterest</span>
+                    </Link>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Logo and Description */}
                     <div>
@@ -52,28 +66,27 @@ export default async function Footer() {
                             <ul className="space-y-3">
                                 {section.links.map((link) => (
                                     <li key={link.name}>
-                                        {link.external ? (
-                                            <a
-                                                href={link.href}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-gray-300 hover:text-white transition-colors"
-                                            >
-                                                {link.name}
-                                            </a>
-                                        ) : (
-                                            <Link
-                                                href={link.href}
-                                                className="text-gray-300 hover:text-white transition-colors"
-                                            >
-                                                {link.name}
-                                            </Link>
-                                        )}
+                                        <Link
+                                            href={link.href}
+                                            className="text-gray-300 hover:text-white transition-colors"
+                                        >
+                                            {link.name}
+                                        </Link>
                                     </li>
                                 ))}
                             </ul>
                         </div>
                     ))}
+
+                    {/* Blog Section - Replacing Connect section */}
+                    <div>
+                        <div className="text-white">
+                            <Link href="/blog" className="text-lg font-semibold hover:text-purple-400 transition-colors">
+                                Blog
+                            </Link>
+                        </div>
+                        <BlogCarousel />
+                    </div>
                 </div>
 
                 {/* Copyright */}

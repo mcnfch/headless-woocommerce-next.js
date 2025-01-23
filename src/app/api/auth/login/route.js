@@ -6,10 +6,8 @@ const WC_URL = process.env.NEXT_PUBLIC_WOOCOMMERCE_URL;
 const ADMIN_JWT_TOKEN = process.env.PRIVATE_WP_JWT_TOKEN;
 
 export async function POST(request) {
-  console.log('Login API called');
   try {
     const { username, password } = await request.json();
-    console.log('Login attempt for:', username);
 
     // Get user by username
     const userSearchResponse = await fetch(`${WC_URL}/wp-json/wp/v2/users?search=${username}&context=edit`, {
@@ -20,7 +18,6 @@ export async function POST(request) {
     });
 
     const users = await userSearchResponse.json();
-    console.log('User search response:', users);
 
     if (!Array.isArray(users) || users.length === 0) {
       return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
@@ -29,7 +26,6 @@ export async function POST(request) {
     const user = users[0];
 
     // Create session with user data
-    console.log('Creating session...');
     const session = await getIronSession(request.cookies, sessionOptions);
     
     // Clear any existing session data
@@ -49,11 +45,9 @@ export async function POST(request) {
       billing: user.billing || {},
       shipping: user.shipping || {}
     };
-    console.log('Session user data:', session.user);
     
     // Save session
     await session.save();
-    console.log('Session saved');
 
     // Create response with session cookie
     const response = NextResponse.json({ 

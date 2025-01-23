@@ -49,7 +49,7 @@ export function CartProvider({ children }) {
           action: 'add-item',
           item: {
             ...data,
-            price: parsePrice(data.price)
+            price: parsePrice(data.price || '0')
           }
         })
       });
