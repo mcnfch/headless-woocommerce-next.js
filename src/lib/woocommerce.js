@@ -21,36 +21,56 @@ const desiredCategories = [
 
 export async function getTopLevelCategories() {
   try {
-    const response = await fetch(`${WOOCOMMERCE_URL}/wp-json/wc/v3/products/categories?per_page=100&hide_empty=false`, {
-      headers: {
-        'Authorization': `Bearer ${process.env.PRIVATE_WP_JWT_TOKEN}`
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_WOOCOMMERCE_URL}/wp-json/wc/v3/products/categories?parent=0&per_page=100`,
+      {
+        headers: {
+          'Authorization': 'Basic ' + Buffer.from(
+            process.env.NEXT_PUBLIC_WOOCOMMERCE_KEY + ':' + 
+            process.env.NEXT_PUBLIC_WOOCOMMERCE_SECRET
+          ).toString('base64')
+        }
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
+    
+    // Create a mapping of slugs to their desired order
+    const orderMap = Object.fromEntries(
+      desiredCategories.map((slug, index) => [slug, index])
+    );
 
-    // Filter and sort categories according to our desired order
-    const categories = desiredCategories
-      .map(slug => data.find(cat => cat.slug === slug))
-      .filter(Boolean);
+    // Filter and sort categories according to desiredCategories
+    const sortedCategories = data
+      .filter(category => 
+        category.slug !== 'uncategorized' &&
+        desiredCategories.includes(category.slug)
+      )
+      .sort((a, b) => orderMap[a.slug] - orderMap[b.slug]);
 
-    return categories.map(category => ({
-      id: category.id,
-      name: category.name,
-      slug: category.slug,
-      description: category.description,
-      image: category.image ? {
-        src: category.image.src,
-        alt: category.image.alt || category.name,
-      } : null,
-    }));
+    // If any desired category is missing, create a placeholder for it
+    const finalCategories = desiredCategories.map(slug => {
+      const existingCategory = sortedCategories.find(cat => cat.slug === slug);
+      if (existingCategory) return existingCategory;
+
+      // Create placeholder for missing categories
+      return {
+        id: `placeholder-${slug}`,
+        name: slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+        slug: slug,
+        description: `Explore our ${slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')} collection`,
+        image: null
+      };
+    });
+
+    return finalCategories;
   } catch (error) {
-    console.error("Error fetching categories:", error);
-    return [];
+    console.error('Error fetching categories:', error);
+    throw error;
   }
 }
 

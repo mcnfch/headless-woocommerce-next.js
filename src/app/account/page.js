@@ -310,7 +310,7 @@ export default function AccountPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-black">My Account</h1>
+        <h2 className="text-3xl font-bold text-black">My Account</h2>
         <div className="space-x-4">
           <button
             onClick={handleLogout}

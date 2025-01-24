@@ -12,7 +12,7 @@ export default function CartSlideout() {
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={closeCart}>
+      <Dialog as="div" className="relative z-50" onClose={closeCart}>
         <Transition.Child
           as={Fragment}
           enter="ease-in-out duration-500"

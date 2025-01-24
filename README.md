@@ -1,192 +1,189 @@
-# Groovy Gallery Designs - Next.js WooCommerce App
+# Groovy Gallery Designs - Next.js E-commerce Platform
 
-A Next.js application that integrates with WooCommerce and uses Redis for high-performance product caching.
+A modern, feature-rich e-commerce platform built with Next.js 15, WooCommerce integration, and Stripe payments.
 
 ## Features
 
-- Next.js 13+ App Router
-- WooCommerce Integration
-- Redis Caching
-- Product Category Navigation
-- Fast Product Search
-- Responsive Design
+### 🛍️ Shopping Experience
+- **Product Catalog**
+  - Dynamic product listings with categories
+  - Advanced product filtering and search
+  - Product image galleries with zoom functionality
+  - Detailed product descriptions and variants
+  - Related products suggestions
 
-## Getting Started
+- **Shopping Cart**
+  - Real-time cart updates
+  - Persistent cart storage using Redis
+  - Multiple product variants support
+  - Quantity adjustments
+  - Cart summary with totals
 
-First, set up your environment variables:
+- **Checkout Process**
+  - Secure Stripe payment integration
+  - Guest checkout support
+  - Order summary review
+  - Success/Cancel order handling
+  - Free shipping thresholds
 
-```bash
-# WooCommerce API credentials
-NEXT_PUBLIC_WORDPRESS_URL=your-woocommerce-site-url
-NEXT_PUBLIC_WOOCOMMERCE_KEY=your-consumer-key
-NEXT_PUBLIC_WOOCOMMERCE_SECRET=your-consumer-secret
+### 👤 User Features
+- **Account Management**
+  - User registration and login
+  - Order history
+  - Account details management
+  - Saved shipping addresses
 
-# Redis configuration
-REDIS_HOST=localhost
-REDIS_PORT=6379
+- **Custom Designs**
+  - Custom design request system
+  - Project requirements submission
+  - Design consultation booking
+
+### 📱 User Interface
+- **Responsive Design**
+  - Mobile-first approach
+  - Tailwind CSS styling
+  - Optimized for all screen sizes
+  - Modern UI components using HeadlessUI
+
+- **Enhanced UX**
+  - Newsletter subscription with Mailchimp
+  - Social sharing buttons
+  - Blog carousel for content
+  - Loading states and animations
+
+### 🔧 Technical Features
+- **Performance**
+  - Server-side rendering
+  - Image optimization
+  - Redis caching
+  - Sitemap generation
+
+  ![Performance Metrics](public/images/Screenshot%202025-01-24%20at%206.36.36%20PM.png)
+  *Lighthouse performance score showing optimal loading and rendering metrics*
+
+- **Security**
+  - Iron Session management
+  - Secure payment processing
+  - Rate limiting on API routes
+  - CORS protection
+
+- **Integration**
+  - WooCommerce REST API
+  - Stripe Payment Gateway
+  - Mailchimp Marketing
+  - Social media sharing
+
+## Prerequisites
+
+### System Requirements
+- Node.js 18.x or higher
+- Redis 6.x or higher
+- PM2 for production deployment
+- HTTPS for production environment
+
+### API Keys and Accounts
+1. **WooCommerce**
+   - WooCommerce store setup
+   - REST API consumer key and secret
+
+2. **Stripe**
+   - Stripe account
+   - API keys (publishable and secret)
+   - Webhook secret for order processing
+
+3. **Mailchimp**
+   - Mailchimp account
+   - API key
+   - Audience ID
+   - Server prefix
+
+### Environment Variables
+Create `.env.development` and `.env.production` with:
+```env
+# WooCommerce
+PUBLIC_API_PROVIDER=Woocommerce
+PUBLIC_DOMAIN=your-domain.com
+PUBLIC_HTTP_ENDPOINT=https://your-woo-endpoint.com
+
+# Stripe
+STRIPE_SECRET_KEY=sk_xxx
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_xxx
+
+# Redis
+REDIS_URL=redis://localhost:6379
+
+# Session
+SESSION_PASSWORD=your-secure-password
+
+# Mailchimp
+MAILCHIMP_API_KEY=xxx
+MAILCHIMP_SERVER_PREFIX=xxx
+MAILCHIMP_AUDIENCE_ID=xxx
 ```
 
-Then, run the development server:
+## Installation
 
+1. Clone the repository:
+```bash
+git clone https://github.com/your-username/ggd-next-woo.git
+cd ggd-next-woo
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Set up environment variables:
+```bash
+cp .env.example .env.local
+```
+
+4. Start Redis server:
+```bash
+redis-server
+```
+
+5. Run development server:
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
-The server will start on [http://localhost:3010](http://localhost:3010).
+## Development
 
-## Product Database Schema
+- `npm run dev` - Start development server
+- `npm run build` - Build production bundle
+- `npm run start` - Start production server with PM2
+- `npm run stop` - Stop PM2 server
+- `npm run generate-sitemaps` - Generate sitemaps
 
-### Data Storage
+## Production Deployment
 
-Products are stored in two locations:
-1. JSON file cache (`/data/products.json`)
-2. Redis database
-
-### Redis Schema
-
-Products are stored in Redis using the following key patterns:
-
-1. Product by ID:
-```
-Key: product:{id}
-Type: String (JSON)
-Example: product:123 -> {"id": 123, "name": "Cool Shirt", ...}
+1. Set up production environment variables
+2. Build the application:
+```bash
+npm run build
 ```
 
-2. Product by Slug:
-```
-Key: product_slug:{slug}
-Type: String (JSON)
-Example: product_slug:cool-shirt -> {"id": 123, "name": "Cool Shirt", ...}
+3. Start the production server:
+```bash
+npm run start
 ```
 
-3. Category Products:
-```
-Key: category:{slug}
-Type: Set
-Example: category:accessories -> [123, 456, 789]
-```
+## Tech Stack
 
-### Product JSON Schema
+- **Frontend**: Next.js 15, React 19, TailwindCSS
+- **State Management**: React Hooks, Context API
+- **Payment**: Stripe
+- **Caching**: Redis
+- **CMS**: WooCommerce
+- **Email Marketing**: Mailchimp
+- **Deployment**: PM2
 
-Products are stored with the following structure:
+## Support
 
-```json
-{
-  "id": number,
-  "name": string,
-  "slug": string,
-  "permalink": string,
-  "date_created": string,
-  "date_modified": string,
-  "type": string,
-  "status": string,
-  "featured": boolean,
-  "catalog_visibility": string,
-  "description": string,
-  "short_description": string,
-  "sku": string,
-  "price": string,
-  "regular_price": string,
-  "sale_price": string,
-  "date_on_sale_from": string|null,
-  "date_on_sale_to": string|null,
-  "on_sale": boolean,
-  "purchasable": boolean,
-  "total_sales": number,
-  "virtual": boolean,
-  "downloadable": boolean,
-  "downloads": Array<{
-    "id": string,
-    "name": string,
-    "file": string
-  }>,
-  "download_limit": number,
-  "download_expiry": number,
-  "tax_status": string,
-  "tax_class": string,
-  "manage_stock": boolean,
-  "stock_quantity": number|null,
-  "stock_status": string,
-  "backorders": string,
-  "backorders_allowed": boolean,
-  "backordered": boolean,
-  "low_stock_amount": number|null,
-  "sold_individually": boolean,
-  "weight": string,
-  "dimensions": {
-    "length": string,
-    "width": string,
-    "height": string
-  },
-  "shipping_required": boolean,
-  "shipping_taxable": boolean,
-  "shipping_class": string,
-  "shipping_class_id": number,
-  "reviews_allowed": boolean,
-  "average_rating": string,
-  "rating_count": number,
-  "images": Array<{
-    "id": number,
-    "date_created": string,
-    "date_modified": string,
-    "src": string,
-    "name": string,
-    "alt": string
-  }>,
-  "attributes": Array<{
-    "id": number,
-    "name": string,
-    "position": number,
-    "visible": boolean,
-    "variation": boolean,
-    "options": Array<string>
-  }>,
-  "categories": Array<{
-    "id": number,
-    "name": string,
-    "slug": string
-  }>,
-  "tags": Array<{
-    "id": number,
-    "name": string,
-    "slug": string
-  }>,
-  "variations": Array<number>,
-  "related_ids": Array<number>
-}
-```
+For support, email support@groovygallerydesigns.com or open an issue in the repository.
 
-## Database Initialization
+## License
 
-The application automatically initializes the product database on startup:
-
-1. Checks if `/data/products.json` exists and is up-to-date
-2. If needed, fetches fresh product data from WooCommerce
-3. Stores products in both JSON file and Redis
-4. Maintains indices for fast lookups by ID, slug, and category
-
-### Cache Invalidation
-
-The product cache is invalidated when:
-- The total number of products in WooCommerce changes
-- The server restarts with an empty Redis database
-
-## Learn More
-
-To learn more about the technologies used:
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [WooCommerce REST API](https://woocommerce.github.io/woocommerce-rest-api-docs/)
-- [Redis Documentation](https://redis.io/docs)
-
-## Deploy
-
-The application can be deployed to any platform that supports Next.js, such as:
-- [Vercel](https://vercel.com)
-- [AWS](https://aws.amazon.com)
-- [DigitalOcean](https://www.digitalocean.com)
-
-Make sure to configure environment variables and Redis connection on your chosen platform.
+Proprietary - All Rights Reserved

@@ -64,35 +64,52 @@ const Header = ({ children }) => {
 
           <div className="flex items-center space-x-4">
             {/* Desktop Navigation */}
-            <div className="hidden md:flex space-x-4">
+            <div className="hidden md:flex items-center space-x-8">
               {loading ? (
                 <div className="text-white">Loading menu...</div>
               ) : error ? (
                 <div className="text-white">Error loading menu: {error}</div>
               ) : (
-                menuItems.map((item) => (
-                  <div key={`menu-${item.id}`} className="relative group">
+                <>
+                  {menuItems.map((item) => (
+                    <div key={item.id} className="relative group">
+                      <Link
+                        href={item.url}
+                        className="text-white py-4 hover:text-gray-300 transition-colors duration-200 flex items-center whitespace-nowrap"
+                      >
+                        {item.title}
+                        {item.children?.length > 0 && (
+                          <svg className="w-4 h-4 ml-1 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        )}
+                      </Link>
+                      {item.children?.length > 0 && (
+                        <div className="absolute left-0 top-full mt-0 w-auto min-w-[250px] bg-black invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 z-50">
+                          <div className="py-1">
+                            {item.children.map((child) => (
+                              <Link
+                                key={child.id}
+                                href={child.url}
+                                className="block px-6 py-2 text-white hover:bg-gray-800 whitespace-normal"
+                              >
+                                {child.title}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  <div className="relative group">
                     <Link
-                      href={item.url}
-                      className="text-white py-2"
+                      href="https://dev.groovygallerydesigns.com/custom-designs"
+                      className="text-white py-4"
                     >
-                      {decodeHTML(item.title.rendered)}
+                      Custom Designs
                     </Link>
-                    {item.children?.length > 0 && (
-                      <div className="absolute left-0 mt-2 w-48 bg-black rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
-                        {item.children.map((child) => (
-                          <Link
-                            key={`submenu-${child.id}`}
-                            href={child.url}
-                            className="block px-4 py-2 text-sm text-white hover:bg-gray-800"
-                          >
-                            {decodeHTML(child.title.rendered)}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
                   </div>
-                ))
+                </>
               )}
             </div>
 
@@ -167,53 +184,64 @@ const Header = ({ children }) => {
             ) : error ? (
               <div className="text-white">Error loading menu: {error}</div>
             ) : (
-              menuItems.map((item) => (
-                <div key={`mobile-${item.id}`}>
-                  <div className="flex items-center justify-between">
-                    <Link
-                      href={item.url}
-                      className="text-white py-2 block"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {decodeHTML(item.title.rendered)}
-                    </Link>
-                    {item.children?.length > 0 && (
-                      <button
-                        onClick={() => toggleSubmenu(item.id)}
-                        className="p-2 text-white"
+              <>
+                {menuItems.map((item) => (
+                  <div key={`mobile-${item.id}`}>
+                    <div className="flex items-center justify-between">
+                      <Link
+                        href={item.url}
+                        className="text-white py-2 block"
+                        onClick={() => setMobileMenuOpen(false)}
                       >
-                        <svg
-                          className={`w-4 h-4 transform transition-transform ${
-                            expandedItems[item.id] ? 'rotate-180' : ''
-                          }`}
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
+                        {item.title}
+                      </Link>
+                      {item.children?.length > 0 && (
+                        <button
+                          onClick={() => toggleSubmenu(item.id)}
+                          className="p-2 text-white"
                         >
-                          <path d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
+                          <svg
+                            className={`w-4 h-4 transform transition-transform ${
+                              expandedItems[item.id] ? 'rotate-180' : ''
+                            }`}
+                            fill="none"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                    {item.children?.length > 0 && expandedItems[item.id] && (
+                      <div className="pl-4 space-y-1">
+                        {item.children.map((child) => (
+                          <Link
+                            key={`mobile-submenu-${child.id}`}
+                            href={child.url}
+                            className="text-white py-2 pl-4 block break-words whitespace-normal"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            {child.title}
+                          </Link>
+                        ))}
+                      </div>
                     )}
                   </div>
-                  {item.children?.length > 0 && expandedItems[item.id] && (
-                    <div className="pl-4">
-                      {item.children.map((child) => (
-                        <Link
-                          key={`mobile-submenu-${child.id}`}
-                          href={child.url}
-                          className="text-white py-2 block"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          {decodeHTML(child.title.rendered)}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
+                ))}
+                <div>
+                  <Link
+                    href="https://dev.groovygallerydesigns.com/custom-designs"
+                    className="text-white py-2 block"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Custom Designs
+                  </Link>
                 </div>
-              ))
+              </>
             )}
           </div>
         )}

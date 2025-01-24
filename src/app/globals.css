@@ -52,3 +52,117 @@ body {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 }
+
+/* WordPress Content Styles */
+.wp-block-image {
+    @apply my-8;
+}
+
+.wp-block-image img {
+    @apply rounded-xl shadow-md;
+}
+
+.wp-block-image figcaption {
+    @apply text-center text-gray-900 mt-2 text-sm;
+}
+
+.wp-block-quote {
+    @apply border-l-4 border-purple-500 pl-6 italic bg-purple-50 py-4 my-8 rounded-r-xl;
+}
+
+.wp-block-quote cite {
+    @apply block mt-2 text-gray-900 not-italic;
+}
+
+.wp-block-gallery {
+    @apply grid grid-cols-2 md:grid-cols-3 gap-4 my-8;
+}
+
+.blocks-gallery-item {
+    @apply relative aspect-square rounded-xl overflow-hidden;
+}
+
+.blocks-gallery-item img {
+    @apply object-cover w-full h-full;
+}
+
+.wp-block-embed {
+    @apply my-8;
+}
+
+.wp-block-embed iframe {
+    @apply rounded-xl shadow-md w-full aspect-video;
+}
+
+.wp-block-separator {
+    @apply my-8 border-t-2 border-purple-100;
+}
+
+/* WordPress Alignment Classes */
+.aligncenter {
+    @apply mx-auto text-center;
+}
+
+.alignleft {
+    @apply float-left mr-6 mb-2;
+}
+
+.alignright {
+    @apply float-right ml-6 mb-2;
+}
+
+/* WordPress Default Classes */
+.wp-caption {
+    @apply max-w-full my-4;
+}
+
+.wp-caption img {
+    @apply rounded-xl shadow-md;
+}
+
+.wp-caption-text {
+    @apply text-center text-gray-900 mt-2 text-sm;
+}
+
+/* WordPress Lists */
+.wp-block-list {
+    @apply my-6 space-y-2;
+}
+
+.wp-block-list li {
+    @apply pl-6 relative;
+}
+
+.wp-block-list li::before {
+    @apply absolute left-0 text-purple-500;
+    content: "•";
+}
+
+/* WordPress Tables */
+.wp-block-table table {
+    @apply w-full border-collapse my-8;
+}
+
+.wp-block-table th {
+    @apply bg-purple-50 text-left p-3 border border-purple-100 font-semibold text-gray-900;
+}
+
+.wp-block-table td {
+    @apply p-3 border border-purple-100 text-gray-900;
+}
+
+/* WordPress Code Blocks */
+.wp-block-code {
+    @apply bg-gray-50 rounded-xl p-4 my-8 font-mono text-sm overflow-x-auto;
+}
+
+/* WordPress Categories and Tags */
+.wp-block-categories,
+.wp-block-tags {
+    @apply flex flex-wrap gap-2 my-4;
+}
+
+.wp-block-categories li,
+.wp-block-tags li {
+    @apply bg-purple-50 px-3 py-1 rounded-full text-purple-700 text-sm;
+}

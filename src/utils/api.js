@@ -11,11 +11,10 @@ const api = new WooCommerce({
 export const fetchMenu = async (menuId) => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_WOOCOMMERCE_URL}/wp-json/wp/v2/menu-items?menus=${menuId}`,
+      `${process.env.NEXT_PUBLIC_WOOCOMMERCE_URL}/wp-json/menus/v1/menus/${menuId}`,
       {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_WP_JWT_TOKEN}`
+          'Content-Type': 'application/json'
         },
         cache: 'no-store'
       }
@@ -23,35 +22,17 @@ export const fetchMenu = async (menuId) => {
 
     if (!response.ok) {
       console.error('Menu fetch error:', response.status, response.statusText);
-      const text = await response.text();
-      console.error('Response text:', text);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
-    return data;
+    console.log('Raw menu data:', JSON.stringify(data, null, 2));
+    return data.items || [];
   } catch (error) {
     console.error('Error fetching menu:', error);
     return [];
   }
 };
-
-// Transform URLs to use local routing
-function transformUrl(url) {
-  // Handle product category URLs
-  if (url.includes('/product-category/')) {
-    return `/category/${url.split('/product-category/')[1].replace(/\/$/, '')}`;
-  }
-  
-  // Handle woo.groovygallerydesigns.com URLs
-  if (url.includes('woo.groovygallerydesigns.com')) {
-    // Extract the path part of the URL
-    const urlObj = new URL(url);
-    return urlObj.pathname.replace(/\/$/, '');
-  }
-  
-  return url;
-}
 
 export const organizeMenuItems = (items) => {
   if (!Array.isArray(items)) {
@@ -59,20 +40,76 @@ export const organizeMenuItems = (items) => {
     return [];
   }
   
-  const topLevel = items.filter(item => !item.parent);
-  const children = items.filter(item => item.parent);
-
-  return topLevel.map(item => ({
-    ...item,
-    url: transformUrl(item.url),
-    children: children
-      .filter(child => child.parent === item.id)
-      .map(child => ({
-        ...child,
+  const decodeTitle = (title) => {
+    return title.replace(/&amp;/g, '&')
+                .replace(/&#038;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#039;/g, "'");
+  };
+  
+  // Only filter out Custom Designs from navigation menu
+  return items
+    .filter(item => !item.title.toLowerCase().includes('custom designs'))
+    .map(item => ({
+      id: item.ID,
+      title: decodeTitle(item.title),
+      url: transformUrl(item.url),
+      children: item.child_items ? item.child_items.map(child => ({
+        id: child.ID,
+        title: decodeTitle(child.title),
         url: transformUrl(child.url)
-      }))
-      .sort((a, b) => a.menu_order - b.menu_order)
-  })).sort((a, b) => a.menu_order - b.menu_order);
+      })) : []
+    }));
+};
+
+// Transform URLs to use local routing
+function transformUrl(url) {
+  if (!url) return '#';
+  
+  // Handle product category URLs
+  if (url.includes('/product-category/')) {
+    return `/category/${url.split('/product-category/')[1].replace(/\/$/, '')}`;
+  }
+  
+  // Don't transform custom designs URL
+  if (url.includes('custom-designs')) {
+    return url;
+  }
+  
+  // Handle woo.groovygallerydesigns.com URLs
+  if (url.includes('woo.groovygallerydesigns.com')) {
+    const urlObj = new URL(url);
+    return urlObj.pathname.replace(/\/$/, '');
+  }
+  
+  return url;
+}
+
+export const fetchFooterMenu = async () => {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_WOOCOMMERCE_URL}/wp-json/menus/v1/menus/437`,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        cache: 'no-store'
+      }
+    );
+
+    if (!response.ok) {
+      console.error('Footer menu fetch error:', response.status, response.statusText);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.items || [];
+  } catch (error) {
+    console.error('Error fetching footer menu:', error);
+    return [];
+  }
 };
 
 export const fetchCategories = async () => {
@@ -98,15 +135,11 @@ export async function fetchFooterPages() {
 
     const pages = {};
     const baseUrl = process.env.PUBLIC_HTTP_ENDPOINT;
-    const headers = {
-        'Authorization': `Bearer ${process.env.PRIVATE_WP_JWT_TOKEN}`
-    };
 
     try {
         await Promise.all(
             Object.entries(pageIds).map(async ([key, id]) => {
-                const response = await fetch(`${baseUrl}/wp-json/wp/v2/pages/${id}`, {
-                    headers,
+                const response = await fetch(`${baseUrl}/wp-json/wp/v2/pages/${id}?context=view`, {
                     next: { revalidate: 3600 } // Cache for 1 hour
                 });
 

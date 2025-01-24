@@ -40,7 +40,7 @@ export default function ProductDetails({ product }) {
 
             {/* Product Info */}
             <div className="mt-10 px-4 sm:mt-16 sm:px-0 lg:mt-0">
-                <h1 className="text-3xl font-bold tracking-tight text-black">{product.name}</h1>
+                <h2 className="text-3xl font-bold tracking-tight text-black">{product.name}</h2>
                 <div className="mt-3">
                     <p className="text-3xl tracking-tight text-black">{formatPrice(product.price)}</p>
                 </div>

@@ -61,7 +61,7 @@ export default function ProductGallery({ images }) {
   return (
     <div className="flex flex-col md:flex-row gap-4">
       {/* Thumbnail Gallery */}
-      <div className="order-2 md:order-1 md:w-24 flex md:flex-col gap-2 overflow-x-auto md:overflow-y-auto scrollbar-hide pb-2 md:pb-0">
+      <div className="order-2 md:order-1 md:w-24 flex md:flex-col gap-2 overflow-x-auto md:overflow-y-auto scrollbar-hide pb-2 md:pb-0 mt-[30%] md:mt-12">
         {images.map((image, index) => {
           console.log('Thumb key:', `thumb-${image.id || image.src}-${index}`);
           return (

@@ -9,7 +9,7 @@ export default function CartPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold text-black mb-8">Shopping Cart</h1>
+      <h2 className="text-3xl font-bold text-black mb-8">Shopping Cart</h2>
 
       {loading ? (
         <div className="text-black">Loading cart...</div>

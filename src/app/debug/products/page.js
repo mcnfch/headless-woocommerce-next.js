@@ -64,7 +64,7 @@ export default function DebugProducts() {
 
   return (
     <div className="p-8 bg-white">
-      <h1 className="text-2xl font-bold mb-4 text-black">Debug: Product IDs</h1>
+      <h2 className="text-2xl font-bold mb-4 text-black">Debug: Product IDs</h2>
       <div className="mb-4 text-black">Total Products: {total}</div>
       <div className="grid grid-cols-5 gap-4 mb-8">
         {products.map(product => (

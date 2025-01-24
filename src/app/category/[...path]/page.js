@@ -96,12 +96,60 @@ function formatCategoryTitle(slug) {
 }
 
 export default async function CategoryPage({ params }) {
-  const { path } = params;
+  const resolvedParams = await Promise.resolve(params);
+  const { path } = resolvedParams;
   const { products, category } = await getProductsAndCategory(path);
+
+  // Create schema markup for collection
+  const collectionSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": category?.name || 'Products',
+    "description": `Collection of ${category?.name?.toLowerCase() || 'products'} from Groovy Gallery Designs`,
+    "url": `${process.env.NEXT_PUBLIC_FRONTEND_URL || ''}/category/${path.join('/')}`,
+    "mainEntity": {
+      "@type": "ItemList",
+      "itemListElement": products?.map((product, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "item": {
+          "@type": "Product",
+          "name": product.name,
+          "description": product.description?.replace(/<[^>]*>/g, '') // Remove HTML tags
+            ?.replace(/&amp;/g, '&')  // Convert &amp; to &
+            ?.replace(/&lt;/g, '<')   // Convert &lt; to <
+            ?.replace(/&gt;/g, '>')   // Convert &gt; to >
+            ?.replace(/&quot;/g, '"') // Convert &quot; to "
+            ?.replace(/&#039;/g, "'") // Convert &#039; to '
+            ?.trim() || '',
+          "image": product.images?.[0]?.src,
+          "url": `${process.env.NEXT_PUBLIC_FRONTEND_URL || ''}/product/${product.slug}`,
+          "brand": {
+            "@type": "Brand",
+            "name": "Groovy Gallery Designs"
+          },
+          "offers": {
+            "@type": "Offer",
+            "priceCurrency": "USD",
+            "price": product.price || "0.00",
+            "availability": product.stock_status === 'instock'
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock"
+          }
+        }
+      }))
+    }
+  };
 
   return (
     <main className="container mx-auto px-4 py-8" role="main" aria-label={`${category?.name || 'Category'} page`}>
-      <h1 className="text-3xl font-bold mb-8 text-gray-900">{category?.name || 'Products'}</h1>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(collectionSchema)
+        }}
+      />
+      <h2 className="text-white text-[1.4rem] mb-8">{decodeURIComponent(category?.name)}</h2>
       <div 
         className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6"
         role="region" 
