@@ -77,25 +77,74 @@ A modern, feature-rich e-commerce platform built with Next.js 15, WooCommerce in
 
 ### System Requirements
 - Node.js 18.x or higher
-- Redis 6.x or higher
+- Redis 6.x or higher (Memory Database)
 - PM2 for production deployment
 - HTTPS for production environment
+- Git for version control
+- npm or yarn package manager
 
-### API Keys and Accounts
+### WordPress Requirements
+#### Core Setup
+- WordPress 6.x or higher
+- WooCommerce 8.x or higher
+- PHP 8.1 or higher
+- MySQL 8.0 or higher
+
+#### Required API Access
+1. **WordPress REST API**
+   - User management endpoints enabled
+   - Posts and pages endpoints enabled
+   - Basic Authentication enabled
+
+2. **WooCommerce REST API**
+   - Products and categories endpoints
+   - Customers endpoints
+   - Orders endpoints
+   - Coupons endpoints
+   - Store API enabled for cart operations
+
+#### Required WordPress Plugins
 1. **WooCommerce**
+   - WooCommerce REST API enabled
+   - WooCommerce Store API enabled
+   - Basic Authentication enabled for REST API
+
+2. **Additional Plugins**
+   - Advanced Custom Fields (ACF) Pro
+   - WooCommerce Stripe Gateway
+   - WP REST Cache (recommended for performance)
+   - Yoast SEO
+   - WP-Optimize (recommended for performance)
+
+### Development Tools
+- Visual Studio Code or similar IDE
+- Redis Commander (optional, for Redis management)
+- Postman or similar (for API testing)
+- Chrome DevTools or similar browser tools
+
+### Cloud Services Accounts
+1. **WooCommerce**
+   - WordPress hosting account
    - WooCommerce store setup
    - REST API consumer key and secret
+   - CORS configured for your domain
 
 2. **Stripe**
    - Stripe account
    - API keys (publishable and secret)
    - Webhook secret for order processing
+   - Stripe CLI for local testing
 
 3. **Mailchimp**
    - Mailchimp account
    - API key
    - Audience ID
    - Server prefix
+
+4. **Redis**
+   - Local Redis server for development
+   - Production Redis server with sufficient memory for cart data
+   - Basic Redis security configuration
 
 ### Environment Variables
 Create `.env.development` and `.env.production` with:
