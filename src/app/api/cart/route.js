@@ -1,5 +1,4 @@
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { NextResponse, NextRequest } from 'next/server';
 import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
 import { parsePrice } from '@/utils/price';
@@ -12,12 +11,12 @@ async function getOrCreateCart(cartId) {
   if (cartId) {
     cart = await redis.get(`cart:${cartId}`);
     if (cart) {
-      return JSON.parse(cart);
+      return { ...JSON.parse(cart), id: cartId };
     }
   }
   
   // Create new cart if none exists
-  return { items: [], total: 0 };
+  return { id: null, items: [], total: 0 };
 }
 
 async function calculateTotal(items) {
@@ -27,10 +26,9 @@ async function calculateTotal(items) {
   }, 0);
 }
 
-export async function GET() {
+export async function GET(request) {
   try {
-    const cookieStore = await cookies();
-    const cartId = cookieStore.get(CART_COOKIE)?.value;
+    const cartId = request.cookies.get(CART_COOKIE)?.value;
     const cart = await getOrCreateCart(cartId);
     return NextResponse.json(cart);
   } catch (error) {
@@ -41,8 +39,7 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const cookieStore = await cookies();
-    let cartId = cookieStore.get(CART_COOKIE)?.value;
+    let cartId = request.cookies.get(CART_COOKIE)?.value;
     
     if (!cartId) {
       cartId = uuidv4();
@@ -94,20 +91,32 @@ export async function POST(request) {
         break;
       }
 
+      case 'clear': {
+        cart.items = [];
+        cart.total = 0;
+        break;
+      }
+
       default:
         throw new Error('Invalid action');
     }
 
     cart.total = await calculateTotal(cart.items);
+
+    // Save updated cart
     await redis.set(`cart:${cartId}`, JSON.stringify(cart));
-    
+
+    // Set cart cookie if it doesn't exist
     const response = NextResponse.json(cart);
-    if (!cookieStore.get(CART_COOKIE)) {
+    if (!request.cookies.get(CART_COOKIE)) {
       response.cookies.set(CART_COOKIE, cartId, {
-        path: '/',
-        maxAge: 60 * 60 * 24 * 30, // 30 days
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 1 week
       });
     }
+
     return response;
   } catch (error) {
     console.error('Failed to update cart:', error);

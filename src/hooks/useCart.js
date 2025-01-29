@@ -6,7 +6,7 @@ import { parsePrice } from '@/utils/price';
 const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
-  const [cart, setCart] = useState({ items: [], total: 0 });
+  const [cart, setCart] = useState({ id: null, items: [], total: 0 });
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [cartCount, setCartCount] = useState(0);
@@ -25,16 +25,17 @@ export function CartProvider({ children }) {
     try {
       const response = await fetch('/api/cart');
       const data = await response.json();
-      // Ensure total is always a number
+      // Ensure total is always a number and cart has an ID
       setCart({
         ...data,
+        id: data.id || null,
         total: typeof data.total === 'number' ? data.total : 0,
         items: Array.isArray(data.items) ? data.items : []
       });
     } catch (error) {
       console.error('Failed to fetch cart:', error);
       // Set default state on error
-      setCart({ items: [], total: 0 });
+      setCart({ id: null, items: [], total: 0 });
     } finally {
       setLoading(false);
     }
@@ -107,8 +108,15 @@ export function CartProvider({ children }) {
 
   const clearCart = async () => {
     try {
-      await fetch('/api/cart/clear', { method: 'POST' });
-      setCart({ items: [], total: 0 });
+      const response = await fetch('/api/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'clear'
+        }),
+      });
+      const updatedCart = await response.json();
+      setCart(updatedCart);
     } catch (error) {
       console.error('Failed to clear cart:', error);
       throw error;

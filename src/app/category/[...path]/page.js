@@ -36,7 +36,7 @@ export async function generateMetadata(props) {
 async function getProductsByCategory(slug) {
   const redis = new Redis({
     host: process.env.REDIS_HOST || 'localhost',
-    port: process.env.REDIS_PORT || 6379,
+    port: process.env.REDIS_PORT || 6310,
     password: process.env.REDIS_PASSWORD
   });
 
@@ -57,9 +57,17 @@ async function getProductsByCategory(slug) {
       })
     );
 
-    // Filter out any null values and sort by date
-    const validProducts = products
+    // Filter out any null values, deduplicate by ID, and sort by date
+    const productMap = new Map();
+    products
       .filter(Boolean)
+      .forEach(product => {
+        if (!productMap.has(product.id)) {
+          productMap.set(product.id, product);
+        }
+      });
+    
+    const validProducts = Array.from(productMap.values())
       .sort((a, b) => new Date(b.date_created) - new Date(a.date_created));
 
     // Cache the result
@@ -80,9 +88,13 @@ async function getProductsByCategory(slug) {
 
 async function getProductsAndCategory(path) {
   const lastSlug = path[path.length - 1];
+  
+  // Only get products from the specific category
   const products = await getProductsByCategory(lastSlug);
+
+  // Find the current category from the last product's categories
   const category = products.length > 0 
-    ? products[0].categories.find(cat => cat.slug === lastSlug) 
+    ? products[0].categories.find(cat => cat.slug === lastSlug)
     : null;
 
   return { products, category };

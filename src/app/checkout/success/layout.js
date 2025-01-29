@@ -2,7 +2,7 @@
 
 import { CartProvider } from 'use-shopping-cart';
 
-const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_TEST;
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
 export default function CheckoutSuccessLayout({ children }) {
   return (

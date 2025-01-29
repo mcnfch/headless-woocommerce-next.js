@@ -6,10 +6,10 @@ import { useRouter } from 'next/navigation';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useCart } from '@/hooks/useCart';
-import CheckoutForm from '@/components/checkout/CheckoutForm';
+import { CheckoutForm } from '@/components/checkout/CheckoutForm';
 
-// Initialize Stripe with test key
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_TEST);
+// Initialize Stripe with live key
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 export default function CheckoutPage() {
   const { user } = useAuth();
@@ -23,6 +23,16 @@ export default function CheckoutPage() {
   const [discountPercent, setDiscountPercent] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+  const [billingInfo, setBillingInfo] = useState({
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    email: user?.email || '',
+    address1: '',
+    city: '',
+    state: '',
+    postcode: '',
+    country: 'US'
+  });
   const [shippingInfo, setShippingInfo] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
@@ -32,14 +42,20 @@ export default function CheckoutPage() {
     postcode: '',
     country: 'US'
   });
+  const [useSameAddress, setUseSameAddress] = useState(true);
 
-  const handleShippingChange = (e) => {
+  const handleBillingChange = (e) => {
     const { name, value } = e.target;
-    setShippingInfo(prev => ({
+    setBillingInfo(prev => ({
       ...prev,
       [name]: value
     }));
-    // Clear validation error when field is edited
+    if (useSameAddress) {
+      setShippingInfo(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
     if (validationErrors[name]) {
       setValidationErrors(prev => ({
         ...prev,
@@ -48,28 +64,67 @@ export default function CheckoutPage() {
     }
   };
 
-  const validateShippingInfo = () => {
+  const handleShippingChange = (e) => {
+    const { name, value } = e.target;
+    setShippingInfo(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    if (validationErrors[`shipping_${name}`]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [`shipping_${name}`]: ''
+      }));
+    }
+  };
+
+  const handleUseSameAddress = (e) => {
+    setUseSameAddress(e.target.checked);
+    if (e.target.checked) {
+      setShippingInfo(billingInfo);
+    }
+  };
+
+  const validateAddresses = () => {
     const errors = {};
     const requiredFields = [
       { key: 'firstName', label: 'First Name' },
       { key: 'lastName', label: 'Last Name' },
+      { key: 'email', label: 'Email' },
       { key: 'address1', label: 'Address' },
       { key: 'city', label: 'City' },
       { key: 'state', label: 'State' },
       { key: 'postcode', label: 'Postal Code' }
     ];
 
+    // Validate billing address
     requiredFields.forEach(({ key, label }) => {
-      if (!shippingInfo[key]?.trim()) {
+      if (!billingInfo[key]?.trim()) {
         errors[key] = `${label} is required`;
       }
     });
 
-    // Validate postal code format for US
-    if (shippingInfo.country === 'US' && shippingInfo.postcode) {
+    // Validate shipping address if different from billing
+    if (!useSameAddress) {
+      requiredFields.forEach(({ key, label }) => {
+        if (!shippingInfo[key]?.trim()) {
+          errors[`shipping_${key}`] = `Shipping ${label} is required`;
+        }
+      });
+    }
+
+    // Validate postal codes
+    if (billingInfo.country === 'US' && billingInfo.postcode) {
+      const zipRegex = /^\d{5}(-\d{4})?$/;
+      if (!zipRegex.test(billingInfo.postcode)) {
+        errors.postcode = 'Invalid ZIP code format';
+      }
+    }
+
+    if (!useSameAddress && shippingInfo.country === 'US' && shippingInfo.postcode) {
       const zipRegex = /^\d{5}(-\d{4})?$/;
       if (!zipRegex.test(shippingInfo.postcode)) {
-        errors.postcode = 'Invalid ZIP code format';
+        errors.shipping_postcode = 'Invalid shipping ZIP code format';
       }
     }
 
@@ -80,7 +135,7 @@ export default function CheckoutPage() {
   const createPaymentIntent = async () => {
     if (isProcessing) return;
     
-    if (!validateShippingInfo()) {
+    if (!validateAddresses()) {
       return;
     }
 
@@ -94,7 +149,6 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Calculate total in cents for Stripe
     const amountInCents = Math.round((cart.total - (discountAmount || 0)) * 100);
     if (amountInCents < 50) {
       alert('Order total must be at least $0.50');
@@ -113,16 +167,17 @@ export default function CheckoutPage() {
           amount: amountInCents,
           cartId: cart.id,
           couponCode: couponValid ? couponCode : null,
-          shipping: shippingInfo
+          billingAddress: billingInfo,
+          shippingAddress: useSameAddress ? billingInfo : shippingInfo
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create payment intent');
+        throw new Error(data.error || 'Failed to create payment intent');
       }
 
-      const data = await response.json();
       setClientSecret(data.clientSecret);
     } catch (error) {
       console.error("Error creating payment intent:", error);
@@ -280,7 +335,7 @@ export default function CheckoutPage() {
           <div className="bg-white p-6 rounded-lg shadow">
             {!clientSecret ? (
               <>
-                <h3 className="text-lg font-semibold mb-4 text-black">Shipping Information</h3>
+                <h3 className="text-lg font-semibold mb-4 text-black">Billing Information</h3>
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -288,8 +343,8 @@ export default function CheckoutPage() {
                       <input
                         type="text"
                         name="firstName"
-                        value={shippingInfo.firstName}
-                        onChange={handleShippingChange}
+                        value={billingInfo.firstName}
+                        onChange={handleBillingChange}
                         className={`block w-full rounded-md border px-3 py-2 text-black ${
                           validationErrors.firstName ? 'border-red-500' : 'border-gray-300'
                         }`}
@@ -303,8 +358,8 @@ export default function CheckoutPage() {
                       <input
                         type="text"
                         name="lastName"
-                        value={shippingInfo.lastName}
-                        onChange={handleShippingChange}
+                        value={billingInfo.lastName}
+                        onChange={handleBillingChange}
                         className={`block w-full rounded-md border px-3 py-2 text-black ${
                           validationErrors.lastName ? 'border-red-500' : 'border-gray-300'
                         }`}
@@ -314,13 +369,69 @@ export default function CheckoutPage() {
                       )}
                     </div>
                   </div>
+                  <div className="grid grid-cols-6 gap-4">
+                    <div className="col-span-3">
+                      <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                        First Name
+                      </label>
+                      <input
+                        type="text"
+                        name="firstName"
+                        id="firstName"
+                        value={billingInfo.firstName}
+                        onChange={handleBillingChange}
+                        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm ${
+                          validationErrors.firstName ? 'border-red-500' : ''
+                        }`}
+                      />
+                      {validationErrors.firstName && (
+                        <p className="mt-1 text-sm text-red-600">{validationErrors.firstName}</p>
+                      )}
+                    </div>
+                    <div className="col-span-3">
+                      <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                        Last Name
+                      </label>
+                      <input
+                        type="text"
+                        name="lastName"
+                        id="lastName"
+                        value={billingInfo.lastName}
+                        onChange={handleBillingChange}
+                        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm ${
+                          validationErrors.lastName ? 'border-red-500' : ''
+                        }`}
+                      />
+                      {validationErrors.lastName && (
+                        <p className="mt-1 text-sm text-red-600">{validationErrors.lastName}</p>
+                      )}
+                    </div>
+                    <div className="col-span-6">
+                      <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        id="email"
+                        value={billingInfo.email}
+                        onChange={handleBillingChange}
+                        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm ${
+                          validationErrors.email ? 'border-red-500' : ''
+                        }`}
+                      />
+                      {validationErrors.email && (
+                        <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+                      )}
+                    </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
                     <input
                       type="text"
                       name="address1"
-                      value={shippingInfo.address1}
-                      onChange={handleShippingChange}
+                      value={billingInfo.address1}
+                      onChange={handleBillingChange}
                       className={`block w-full rounded-md border px-3 py-2 text-black ${
                         validationErrors.address1 ? 'border-red-500' : 'border-gray-300'
                       }`}
@@ -335,8 +446,8 @@ export default function CheckoutPage() {
                       <input
                         type="text"
                         name="city"
-                        value={shippingInfo.city}
-                        onChange={handleShippingChange}
+                        value={billingInfo.city}
+                        onChange={handleBillingChange}
                         className={`block w-full rounded-md border px-3 py-2 text-black ${
                           validationErrors.city ? 'border-red-500' : 'border-gray-300'
                         }`}
@@ -350,8 +461,8 @@ export default function CheckoutPage() {
                       <input
                         type="text"
                         name="state"
-                        value={shippingInfo.state}
-                        onChange={handleShippingChange}
+                        value={billingInfo.state}
+                        onChange={handleBillingChange}
                         className={`block w-full rounded-md border px-3 py-2 text-black ${
                           validationErrors.state ? 'border-red-500' : 'border-gray-300'
                         }`}
@@ -367,8 +478,8 @@ export default function CheckoutPage() {
                       <input
                         type="text"
                         name="postcode"
-                        value={shippingInfo.postcode}
-                        onChange={handleShippingChange}
+                        value={billingInfo.postcode}
+                        onChange={handleBillingChange}
                         className={`block w-full rounded-md border px-3 py-2 text-black ${
                           validationErrors.postcode ? 'border-red-500' : 'border-gray-300'
                         }`}
@@ -381,15 +492,139 @@ export default function CheckoutPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
                       <select
                         name="country"
-                        value={shippingInfo.country}
-                        onChange={handleShippingChange}
+                        value={billingInfo.country}
+                        onChange={handleBillingChange}
                         className="block w-full rounded-md border border-gray-300 px-3 py-2 text-black"
                       >
                         <option value="US">United States</option>
-                        <option value="CA">Canada</option>
                       </select>
                     </div>
                   </div>
+
+                  <div className="mt-8">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={useSameAddress}
+                        onChange={handleUseSameAddress}
+                        className="rounded border-gray-300 text-black focus:ring-black"
+                      />
+                      <span className="text-sm text-gray-700">Shipping address same as billing</span>
+                    </label>
+                  </div>
+
+                  {!useSameAddress && (
+                    <div className="mt-6 space-y-4">
+                      <h3 className="text-lg font-semibold text-black">Shipping Information</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                          <input
+                            type="text"
+                            name="firstName"
+                            value={shippingInfo.firstName}
+                            onChange={handleShippingChange}
+                            className={`block w-full rounded-md border px-3 py-2 text-black ${
+                              validationErrors.shipping_firstName ? 'border-red-500' : 'border-gray-300'
+                            }`}
+                          />
+                          {validationErrors.shipping_firstName && (
+                            <p className="mt-1 text-sm text-red-600">{validationErrors.shipping_firstName}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                          <input
+                            type="text"
+                            name="lastName"
+                            value={shippingInfo.lastName}
+                            onChange={handleShippingChange}
+                            className={`block w-full rounded-md border px-3 py-2 text-black ${
+                              validationErrors.shipping_lastName ? 'border-red-500' : 'border-gray-300'
+                            }`}
+                          />
+                          {validationErrors.shipping_lastName && (
+                            <p className="mt-1 text-sm text-red-600">{validationErrors.shipping_lastName}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                        <input
+                          type="text"
+                          name="address1"
+                          value={shippingInfo.address1}
+                          onChange={handleShippingChange}
+                          className={`block w-full rounded-md border px-3 py-2 text-black ${
+                            validationErrors.shipping_address1 ? 'border-red-500' : 'border-gray-300'
+                          }`}
+                        />
+                        {validationErrors.shipping_address1 && (
+                          <p className="mt-1 text-sm text-red-600">{validationErrors.shipping_address1}</p>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                          <input
+                            type="text"
+                            name="city"
+                            value={shippingInfo.city}
+                            onChange={handleShippingChange}
+                            className={`block w-full rounded-md border px-3 py-2 text-black ${
+                              validationErrors.shipping_city ? 'border-red-500' : 'border-gray-300'
+                            }`}
+                          />
+                          {validationErrors.shipping_city && (
+                            <p className="mt-1 text-sm text-red-600">{validationErrors.shipping_city}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                          <input
+                            type="text"
+                            name="state"
+                            value={shippingInfo.state}
+                            onChange={handleShippingChange}
+                            className={`block w-full rounded-md border px-3 py-2 text-black ${
+                              validationErrors.shipping_state ? 'border-red-500' : 'border-gray-300'
+                            }`}
+                          />
+                          {validationErrors.shipping_state && (
+                            <p className="mt-1 text-sm text-red-600">{validationErrors.shipping_state}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+                          <input
+                            type="text"
+                            name="postcode"
+                            value={shippingInfo.postcode}
+                            onChange={handleShippingChange}
+                            className={`block w-full rounded-md border px-3 py-2 text-black ${
+                              validationErrors.shipping_postcode ? 'border-red-500' : 'border-gray-300'
+                            }`}
+                          />
+                          {validationErrors.shipping_postcode && (
+                            <p className="mt-1 text-sm text-red-600">{validationErrors.shipping_postcode}</p>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                          <select
+                            name="country"
+                            value={shippingInfo.country}
+                            onChange={handleShippingChange}
+                            className="block w-full rounded-md border border-gray-300 px-3 py-2 text-black"
+                          >
+                            <option value="US">United States</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <button
                     onClick={createPaymentIntent}
                     disabled={isProcessing}
@@ -400,8 +635,8 @@ export default function CheckoutPage() {
                 </div>
               </>
             ) : (
-              <Elements options={options} stripe={stripePromise}>
-                <CheckoutForm />
+              <Elements stripe={stripePromise} options={{ clientSecret }}>
+                <CheckoutForm clientSecret={clientSecret} billingInfo={billingInfo} />
               </Elements>
             )}
           </div>

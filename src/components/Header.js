@@ -103,7 +103,7 @@ const Header = ({ children }) => {
                   ))}
                   <div className="relative group">
                     <Link
-                      href="https://dev.groovygallerydesigns.com/custom-designs"
+                      href="/custom-designs"
                       className="text-white py-4"
                     >
                       Custom Designs
@@ -234,7 +234,7 @@ const Header = ({ children }) => {
                 ))}
                 <div>
                   <Link
-                    href="https://dev.groovygallerydesigns.com/custom-designs"
+                    href="/custom-designs"
                     className="text-white py-2 block"
                     onClick={() => setMobileMenuOpen(false)}
                   >

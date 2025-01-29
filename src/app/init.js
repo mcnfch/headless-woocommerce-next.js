@@ -5,6 +5,8 @@ import path from 'path';
 
 let initializationPromise = null;
 
+const WooCommerce = WooCommerceRestApi.default;
+
 export async function initializeServer() {
   if (initializationPromise) {
     return initializationPromise;
@@ -15,8 +17,8 @@ export async function initializeServer() {
   }
 
   initializationPromise = new Promise(async (resolve) => {
-    const api = new WooCommerceRestApi({
-      url: process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://woo.groovygallerydesigns.com',
+    const api = new WooCommerce({
+      url: process.env.NEXT_PUBLIC_WOOCOMMERCE_URL,
       consumerKey: process.env.NEXT_PUBLIC_WOOCOMMERCE_KEY,
       consumerSecret: process.env.NEXT_PUBLIC_WOOCOMMERCE_SECRET,
       version: 'wc/v3'
